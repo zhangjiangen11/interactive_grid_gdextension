@@ -1,8 +1,11 @@
-[![Interactive Grid GDExtension Godot Asset Library page](https://img.shields.io/static/v1?logo=godotengine&label=Interactive%20Grid%20GDExtension&color=478CBF&message=1.1.0)](https://godotengine.org/asset-library/asset/4372)
+[![Interactive Grid GDExtension Godot Asset Library page](https://img.shields.io/static/v1?logo=godotengine&label=Interactive%20Grid%20GDExtension&color=478CBF&message=1.2.0)](https://godotengine.org/asset-library/asset/4372)
 [![Patreon](https://img.shields.io/badge/Patreon-Vivensoft-F96854?logo=patreon&logoColor=white)](https://www.patreon.com/c/vivensoft/)  
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-AntoineCharruel-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/antoinecharruel)
 [![AntoineCharruel on Itch.io](https://img.shields.io/badge/Itch.io-AntoineCharruel-FF5E5B?logo=itch.io&logoColor=white)](https://antoine-charruel.itch.io/)
 [![Instagram](https://img.shields.io/badge/Instagram-VSFT%20GameDev-E4405F?logo=instagram&logoColor=white)](https://www.instagram.com/vsftgamedev/)
+[![Join the Discord](https://img.shields.io/static/v1?logo=discord&label=Discord&color=7289DA&message=Vivensoft)](https://discord.gg/G8N27Mm2)
+[![YouTube](https://img.shields.io/static/v1?logo=youtube&label=YouTube&color=FF0000&message=antoinecharruel)](https://www.youtube.com/@antoinecharruel)
+
 
 # Interactive Grid GDExtension
 
@@ -22,8 +25,6 @@ InteractiveGrid is a Godot 4.5 GDExtension that allows player interaction with a
 - Customize the grid from the editor: grid size, grid layout (square, hexagonal), cell size, mesh, colors, and shaders.
 - High performance using [MultiMeshInstance3D](https://docs.godotengine.org/en/4.4/classes/class_multimeshinstance3d.html) for efficient rendering of multiple cells.
 
-⚠️ Work in progress : Everything is subject to change.
-
 ## Compatibility:
 
 - Fully compatible with Godot 4.5.
@@ -38,12 +39,9 @@ InteractiveGrid is a Godot 4.5 GDExtension that allows player interaction with a
   </a>
 </div>
 
-
-
 ## Minimal Demo Example in GDScript
 
 📄 [Download the full Interactive Grid GDExtension Minimal demo PDF](https://raw.githubusercontent.com/antoinecharruel/interactive_grid_gdextension/main/docs/pandoc/demo.pdf)
-
 
 ```python
 # =================================================================================================
@@ -151,25 +149,14 @@ func _input(event):
 
 ```python
 // dynamic.gdshader
+// https://rgbcolorpicker.com/0-1
 
 shader_type spatial;
 render_mode unshaded, cull_disabled, depth_draw_opaque;
 
 varying vec4 instance_c;
 
-/*
-// Using alpha as a flag due to GPU/shader limitations:
-
-Interactive_grid.h
-static constexpr int CFL_WALKABLE = 1 << 0;
-static constexpr int CFL_INACCESSIBLE = 1 << 1;
-static constexpr int CFL_IN_VOID = 1 << 2;
-static constexpr int CFL_HOVERED = 1 << 3;
-static constexpr int CFL_SELECTED = 1 << 4;
-static constexpr int CFL_PATH = 1 << 5;
-static constexpr int CFL_VISIBLE = 1 << 6;
-*/
-
+// Using alpha as a flag due to shader limitations:
 const int CFL_WALKABLE = 1 << 0;
 const int CFL_INACCESSIBLE = 1 << 1;
 const int CFL_IN_VOID = 1 << 2;
@@ -180,15 +167,15 @@ const int CFL_VISIBLE = 1 << 6;
 
 void vertex() {
     instance_c = INSTANCE_CUSTOM;
-
+	
 	int cell_flag = int(instance_c.a);
 
-	if ((cell_flag & CFL_WALKABLE) != 0) { // walkable.
+	if ((cell_flag & CFL_WALKABLE) != 0) { // walkable
 		instance_c.a = 0.5;
 	}
-
-    // Red pulse for invalid.
-    if ((cell_flag & CFL_WALKABLE) == 0) { // Unwalkable.
+	
+    // Red pulse for invalid
+    if ((cell_flag & CFL_WALKABLE) == 0) { // Unwalkable
 		float float_speed = 4.0;
 		float color_min = 0.3;
 		float color_max = 0.8;
@@ -199,7 +186,7 @@ void vertex() {
 		instance_c.b = 0.0;
 		instance_c.a = 0.5;
 	}
-
+	
     if ((cell_flag & CFL_PATH) != 0) {
         float float_speed     = 4.0;
         float float_amplitude = 0.2;
@@ -213,14 +200,14 @@ void vertex() {
         VERTEX.y += sin(TIME * speed) * 0.2;
 		instance_c.a = 0.5;
     }
-
-	if ((cell_flag & CFL_VISIBLE) == 0) { // walkable.
+	
+	if ((cell_flag & CFL_VISIBLE) == 0) {
 		instance_c.a = 0.0;
 	}
 }
 
 void fragment() {
-    // Base color.
+    // Base color
     ALBEDO = instance_c.rgb;
     EMISSION = instance_c.rgb;
     ALPHA = instance_c.a;
@@ -240,6 +227,16 @@ void fragment() {
   + [ ] A Define `CFL_VAULT` flag for cells that can be vaulted/climbed.
   + [ ] Assign vaultable cells to a specific collision layer checked by `scan_environnement_obstacles` method.
   + [ ] Add a visual indicator (color) for vaultable cells using `ADD_PROPERTY`.
+
+## Need Help, Found an Issue, or Want to Share Your Work? 🛠️🎨
+
+If you encounter any issues, have questions, want to share your project using Interactive Grid, or give feedback, feel free to reach out on Discord:
+
+<div align="center">
+  <a href="https://discord.gg/G8N27Mm2">
+    <img src="https://img.shields.io/static/v1?logo=discord&label=Discord&color=7289DA&message=Vivensoft" alt="Join the Discord">
+  </a>
+</div>
 
 ## Acknowledgments & References (Videos & Websites)
 

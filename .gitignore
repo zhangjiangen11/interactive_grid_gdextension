@@ -2,21 +2,24 @@
 *.gen.*
 .godot/
 
-# Ignore library files but not the gdextension file
-demo/bin/*
-!demo/bin/android
-demo/bin/android/*
-!demo/bin/android/.gitkeep
-!demo/bin/linux
-demo/bin/linux/*
-!demo/bin/linux/.gitkeep
-!demo/bin/macos
-demo/bin/macos/*
-!demo/bin/macos/.gitkeep
-!demo/bin/windows
-demo/bin/windows/*
-!demo/bin/windows/.gitkeep
-!demo/bin/*.gdextension
+# Keep addons and their binaries
+addons/*
+!addons/
+!addons/**/*.gdextension
+!addons/**/*.so
+!addons/**/*.dll
+!addons/**/*.dylib
+!addons/**/*.gitkeep
+
+demo/addons/*
+!demo/addons/
+!demo/addons/**/*.gdextension
+!demo/addons/**/*.so
+!demo/addons/**/*.dll
+!demo/addons/**/*.dylib
+!demo/addons/**/*.gitkeep
+
+# Ignore SCons database
 .sconsign*.dblite
 
 # Ignore custom.py
@@ -31,7 +34,6 @@ compile_commands.json
 # Binaries
 *.o
 *.os
-*.so
 *.obj
 *.bc
 *.pyc

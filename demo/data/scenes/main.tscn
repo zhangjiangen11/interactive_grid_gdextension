@@ -5,8 +5,11 @@
 [ext_resource type="Script" uid="uid://cnxwc4e8vdiox" path="res://data/scripts/interactive_grid.gd" id="4_w868w"]
 [ext_resource type="PackedScene" uid="uid://dbna5exmjhbhp" path="res://data/scenes/pawn_player.tscn" id="5_dxyxo"]
 
-[sub_resource type="BoxMesh" id="BoxMesh_yeeyf"]
-size = Vector3(0.8, 0.1, 0.8)
+[sub_resource type="CylinderMesh" id="CylinderMesh_yeeyf"]
+top_radius = 0.577
+bottom_radius = 0.577
+height = 0.1
+radial_segments = 6
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_pbhab"]
 render_priority = 0
@@ -23,9 +26,11 @@ collision_mask = 0
 [node name="InteractiveGrid" type="InteractiveGrid" parent="."]
 _rows = 17
 _columns = 17
-_cell_mesh = SubResource("BoxMesh_yeeyf")
+cell_size = Vector2(1, 0.866)
+_cell_mesh = SubResource("CylinderMesh_yeeyf")
 enable_alpha_pass = true
 _material_override = SubResource("ShaderMaterial_pbhab")
+layout = 1
 movement = 1
 script = ExtResource("4_w868w")
 
