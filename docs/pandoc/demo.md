@@ -17,10 +17,10 @@
 - [1 - Setting up the game project](#1---setting-up-the-game-project)
 - [2 - Setting up the playable area](#2---setting-up-the-playable-area)
 - [3 - Player scene and input actions](#3---player-scene-and-input-actions)
-- [4 - Install interactive grid addons](#4---install-interactive-grid-addons)
-- [5 - Setup interactive grid addons](#5---setup-interactive-grid-addons)
+- [4 - Install interactive grid addon](#4---install-interactive-grid-addon)
+- [5 - Setup interactive grid addon](#5---setup-interactive-grid-addon)
 - [6 - Interactive grid scripting](#6---interactive-grid-scripting)
-- [7 - Setup World Scene for interactive grid addons](#7---setup-world-scene-for-interactive-grid-addons)
+- [7 - Setup World Scene for interactive grid addon](#7---setup-world-scene-for-interactive-grid-addon)
 - [8 - Run the game and test the grid](#8---run-the-game-and-test-the-grid)
 
 ```{=latex}
@@ -39,19 +39,20 @@ Launch Godot, create a new project, choose a location, and give it a name.
 
 ## 2 - Setting up the playable area
 
-- Create the root node.
+- __Create the root node.__
   - Click + and select 3D Scene.
   - Rename the root node Node3D → "World".
 
-- Add the floor.
+- __Add the floor.__
   - Select World, Click +, choose MeshInstance3D.
   - Rename it "Floor".
   - In the Mesh property, select PlaneMesh.
-  - Set Transform → Scale to 20, 20, 1.
+  - Set Transform → Scale to 20.0, 1.0, 20.0
 
-- Add collision to the floor.
+- __Add collision to the floor.__
   - With Floor selected, click Mesh → Create Collision Shape.
-  - Set Collision Shape → Type to Single Convex.
+      - Collision Shape Placement. Static Body Child.
+      - Collision Shape Type: Trimesh.
 
 ```{=latex}
 \begin{center}
@@ -65,9 +66,19 @@ Launch Godot, create a new project, choose a location, and give it a name.
 \end{center}
 ```
 
-- Set the collision layer for the floor.
+- __Set the collision layer for the floor.__
   - Select the StaticBody3D node that was created for the Floor.
-  - In the Collision → Layer property, set it to 15. (This is important to ensure proper alignment of the grid on the floor.)
+  - In the Collision → Layer property, set it to 15.
+
+```{=latex}
+\begin{tcolorbox}[
+	colback=myred!20,
+	colframe=myred,
+  	title=\textbf{\emoji{warning} Important :}
+]
+Assign it to Collision Layer 15. This is important to ensure proper alignment of the grid on the floor.
+\end{tcolorbox}
+```
 
 ```{=latex}
 \begin{center}
@@ -75,7 +86,7 @@ Launch Godot, create a new project, choose a location, and give it a name.
 \end{center}
 ```
 
-- Add light.
+- __Add light.__
   - Add a Sun (Directional Light).
   - Add an Environment.
 
@@ -87,30 +98,30 @@ Launch Godot, create a new project, choose a location, and give it a name.
 
 ## 3 - Player scene and input actions
 
-- Create the player scene.
+- __Create the player scene.__
   - Click +, select 3D Scene.
   - Choose Node3D
-  - Rename it PawnPlayer.
+  - Rename it "PawnPlayer".
 
-- Add the player body.
+- __Add the player body.__
   - Select PawnPlayer (Node3D) node, click +, choose CharacterBody3D.
-  - Rename it Pawn.
+  - Rename it ""Pawn".
   - Add a visual mesh.
     - With Pawn selected, click +, choose MeshInstance3D.
     - In the Mesh property, select CapsuleShape3D.
     - Hold the Control key and move the CapsuleShape3D up.
 
-- Attach a CollisionShape3D to the player.
+- __Attach a CollisionShape3D to the player.__
   - Select the Pawn (CharacterBody3D) node, click +, and add a CollisionShape3D node.
   - In the Mesh property, select CapsuleShape3D.
   - Hold the Control key and move the CapsuleShape3D up.
 
-- Attach a Camera3D to the player.
+- __Attach a Camera3D to the player.__
   - Select the Pawn (CharacterBody3D) node, click +, and add a Camera3D node.
   - Set the Transform → Position to 8, 12, 8.
   - Set Rotation X to -45° and Rotation Y to 45°.
 
-- Moving the player with code.
+- __Moving the player with code.__
   - Attach a script to the player.
     - Select the Pawn (CharacterBody3D) node.
     - Click on the Attach Script icon.
@@ -121,6 +132,17 @@ Launch Godot, create a new project, choose a location, and give it a name.
 \begin{center}
     \includegraphics[width=0.33\textwidth]{data/s3.1.png}
 \end{center}
+```
+
+```{=latex}
+\begin{tcolorbox}[
+  colback=githubGray!20,
+  colframe=githubDark,
+  title={\includegraphics[height=1.2em]{data/github-mark-white.pdf} \textbf{pawn.gd}}
+]
+\href{https://github.com/antoinecharruel/interactive_grid_gdextension/blob/main/minimal_demo/pawn.gd}{\url{https://github.com/antoinecharruel/interactive_grid_gdextension/blob/main/minimal_demo/pawn.gd}
+}
+\end{tcolorbox}
 ```
 
 ```{=latex}
@@ -159,7 +181,7 @@ func _physics_process(delta: float) -> void:
 - Add a Raycast3D node.
   - Select PawnPlayer.
   - Click + and add a Raycast3D node.
-  - Rename it RayCastFromMouse.
+  - Rename it ""RayCastFromMouse".
 
 - Attach the script.
   - Select RayCastFromMouse.
@@ -167,6 +189,16 @@ func _physics_process(delta: float) -> void:
   - Choose the script ray_cast_from_mouse.gd.
   - Fill in the script
 
+```{=latex}
+\begin{tcolorbox}[
+  colback=githubGray!20,
+  colframe=githubDark,
+  title={\includegraphics[height=1.2em]{data/github-mark-white.pdf} \textbf{ray\_cast\_from\_mouse.gd}}
+]
+\href{https://github.com/antoinecharruel/interactive_grid_gdextension/blob/main/minimal_demo/ray_cast_from_mouse.gd}{\url{https://github.com/antoinecharruel/interactive_grid_gdextension/blob/main/minimal_demo/ray_cast_from_mouse.gd}
+}
+\end{tcolorbox}
+```
 
 ```{=latex}
 \begin{lstlisting}[language=python]
@@ -227,14 +259,14 @@ func get_ray_intersection_position() -> Vector3:
 \end{lstlisting}
 ```
 
-- Save and add the player to the main scene.
+- __Save and add the player to the main scene.__
   - Save the player scene as pawn_player.tscn.
   - Open world.tscn, and drag pawn_player.tscn into the scene as an instance.
   - Set the Transform → Position to 0, 0, 0.
 
-## 4 - Install interactive grid addons
+## 4 - Install interactive grid addon
 
-- In Godot, click AssetLib.
+- __In Godot, click AssetLib.__
   - Search for Interactive Grid GDExtension by antoinecharruel.
   - Download and install.
 
@@ -244,7 +276,7 @@ func get_ray_intersection_position() -> Vector3:
 \end{center}
 ```
 
-## 5 - Setup interactive grid addons
+## 5 - Setup interactive grid addon
 
 - Open the PawnPlayer scene.
 - Select CharacterBody3D (Pawn), click +, and add a InteractiveGrid node.
@@ -257,22 +289,38 @@ func get_ray_intersection_position() -> Vector3:
 
 If you see the error:
 
-ERROR: servers/rendering/renderer_rd/storage_rd/mesh_storage.cpp:1827 - Condition "multimesh->mesh.is_null()" is true.
+
+```{=latex}
+\begin{center}
+    \textcolor{myred}{ERROR: servers/rendering/renderer\_rd/storage\_rd/mesh\_storage.cpp:1827 - Condition "multimesh->mesh.is\_null()" is true.}
+\end{center}
+```
 
 Don’t worry—this is normal. It simply means that the InteractiveGrid node does not yet have a multimesh assigned. You can fix it by adding a mesh in the Cell Mesh property.
 
-- Add a cell_mesh
+- __Add a cell_mesh__
   - Select InteractiveGrid, go to the Inspector → Cell Mesh property.
   - Click on the mesh field and select BoxMesh.
-  - Set the size to 0.8, 0.1, 0.8.
+  - Set Transform → 0.8, 0.1, 0.8.
 
 ## 6 - Interactive grid scripting
 
-- Attach a script
+- __Attach a script__
   - Select the InteractiveGrid node.
   - Click Attach Script.
   - Choose or create the script interactive_grid.gd.
   - Fill in the script.
+
+```{=latex}
+\begin{tcolorbox}[
+  colback=githubGray!20,
+  colframe=githubDark,
+  title={\includegraphics[height=1.2em]{data/github-mark-white.pdf} \textbf{interactive\_grid.gd}}
+]
+\href{https://github.com/antoinecharruel/interactive_grid_gdextension/blob/main/minimal_demo/interactive_grid.gd}{\url{https://github.com/antoinecharruel/interactive_grid_gdextension/blob/main/minimal_demo/interactive_grid.gd}
+}
+\end{tcolorbox}
+```
 
 ```{=latex}
 \begin{lstlisting}[language=python]
@@ -360,22 +408,31 @@ func _input(event):
 \end{lstlisting}
 ```
 
-## 7 - Setup World Scene for interactive grid addons
+## 7 - Setup World Scene for interactive grid addon
 
-- Create a wall.
-  - Add a parent node for the walls.
+- __Create a wall.__
+  - __Add a parent node for the walls.__
     - Click +, select Node3D.
     - Rename it "Walls".
 
-  - Add the wall mesh.
-    - Select Walls, click +, choose MeshInstance3D.
-    - In the Mesh property, select CubeMesh.
+  - __Add the wall mesh.__
+    - Select Walls, click +, choose CSGBox3D.
     - Set Transform → Scale to 3.0, 3.0, 0.5.
 
-- Add collision
+- __Add collision.__
   - In the Inspector, check Use Collision.
   - Set the Collision Shape Type to Single Convex.
   - Assign the wall to Collision Layer 14.
+
+```{=latex}
+\begin{tcolorbox}[
+	colback=myred!20,
+	colframe=myred,
+  	title=\textbf{\emoji{warning} Important :}
+]
+Assign it to Collision Layer 14. This is important to ensure that the grid correctly detects obstacles.
+\end{tcolorbox}
+```
 
 ```{=latex}
 \begin{center}
@@ -383,20 +440,31 @@ func _input(event):
 \end{center}
 ```
 
-- Create a ramp.
-  - Add a parent node for ramps.
+- __Create a ramp.__
+  - __Add a parent node for ramps.__
     - Click +, select Node3D.
     - Rename it "Rampes".
 
-  - Add the ramp mesh.
+  - __Add the ramp mesh.__
     - Select Rampes, click +, choose MeshInstance3D.
     - In the Mesh property, select PrismMesh.
     - Set Transform → Scale to 10.0, 2.0, 3.
 
-  - Add collision.
-    - In the Inspector, check Use Collision.
-    - Set the Collision Shape Type to Single Convex.
-    - Assign it to Collision Layer 15 (same as the floor).
+  - __Add collision.__
+    - Create Collision Shape.
+      - Collision Shape Placement. Static Body Child.
+      - Collision Shape Type: Trimesh.
+      - Assign it to Collision Layer 15 (same as the floor).
+
+```{=latex}
+\begin{tcolorbox}[
+	colback=myred!20,
+	colframe=myred,
+  	title=\textbf{\emoji{warning} Important :}
+]
+Assign it to Collision Layer 15. This is important to ensure proper alignment of the grid on the floor.
+\end{tcolorbox}
+```
 
 ```{=latex}
 \begin{center}
@@ -404,7 +472,7 @@ func _input(event):
 \end{center}
 ```
 
-Here is what the World scene structure looks like after setting up walls, ramps, the floor, and the interactive grid:
+Here is what the World scene structure looks like after setting up walls, the ramp, the floor, and the interactive grid:
 
 
 ## 8 - Run the game and test the grid

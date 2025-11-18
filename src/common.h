@@ -4,12 +4,12 @@ File: common.cpp
 Summary: This file provides utility functions and common includes 
          used across the InteractiveGrid Godot GDExtension project.
 
-Last Modified: November 15, 2025
+Last Modified: November 18, 2025
 
 This file is part of the InteractiveGrid GDExtension Source Code.
 Repository: https://github.com/antoinecharruel/interactive_grid
 
-Version InteractiveGrid: 1.2.0
+Version InteractiveGrid: 1.2.1
 Version: Godot Engine v4.5.stable.steam - https://godotengine.org
 
 Author: Antoine Charruel
@@ -29,7 +29,7 @@ Author: Antoine Charruel
 #include <sstream>
 #include <vector>
 
-// Godot engine.
+// Godot engine
 #include <godot_cpp/core/binder_common.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 

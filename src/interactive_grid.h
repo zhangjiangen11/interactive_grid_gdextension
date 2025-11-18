@@ -5,12 +5,12 @@ Summary: InteractiveGrid is a Godot 4.5 GDExtension that allows player
          interaction with a 3D grid, including cell selection, 
 		 pathfinding, and hover highlights.
 
-Last Modified: Novembre 15, 2025
+Last Modified: November 18, 2025
 
 This file is part of the InteractiveGrid GDExtension Source Code.
 Repository: https://github.com/antoinecharruel/interactive_grid
 
-Version InteractiveGrid: 1.2.0
+Version InteractiveGrid: 1.2.1
 Version: Godot Engine v4.5.stable.steam - https://godotengine.org
 
 Author: Antoine Charruel
@@ -20,7 +20,7 @@ Author: Antoine Charruel
 
 #include "common.h"
 
-// Godot engine.
+// Godot engine
 #include <godot_cpp/classes/a_star2d.hpp>
 #include <godot_cpp/classes/box_shape3d.hpp>
 #include <godot_cpp/classes/mesh_instance3d.hpp>
@@ -45,8 +45,8 @@ public:
 		EIGH_DIRECTIONS = 2,
 	};
 
-	InteractiveGrid(); // CONSTRUCTOR
-	~InteractiveGrid(); // DESTRUCTOR
+	InteractiveGrid();
+	~InteractiveGrid();
 
 	// Godot engine
 	virtual void _ready() override;
@@ -255,7 +255,7 @@ private:
     Grid data members
   --------------------------------------------------------------------*/
 
-	// --- Grid.
+	// --- Grid
 
 	unsigned int _rows{ 9 }; // ROWS
 	unsigned int _columns{ 9 }; // COLUMNS
@@ -291,7 +291,7 @@ private:
 	godot::Color _path_color{ godot::Color(0.5647059, 0.93333334, 0.5647059, 1) };
 	godot::Color _hovered_color{ godot::Color(1.0, 0.84313726, 0, 1.0) };
 
-	// --- material.
+	// --- material
 
 	godot::Ref<godot::Material> _material_override;
 

@@ -5,12 +5,12 @@ Summary: InteractiveGrid is a Godot 4.5 GDExtension that allows player
          interaction with a 3D grid, including cell selection,
 		 pathfinding, and hover highlights.
 
-Last Modified: Novembre 15, 2025
+Last Modified: November 18, 2025
 
 This file is part of the InteractiveGrid GDExtension Source Code.
 Repository: https://github.com/antoinecharruel/interactive_grid
 
-Version InteractiveGrid: 1.2.0
+Version InteractiveGrid: 1.2.1
 Version: Godot Engine v4.5.stable.steam - https://godotengine.org
 
 Author: Antoine Charruel
@@ -18,9 +18,9 @@ Author: Antoine Charruel
 
 #include "interactive_grid.h"
 
-InteractiveGrid::InteractiveGrid() {} // CONSTRUCTOR
+InteractiveGrid::InteractiveGrid() {}
 
-InteractiveGrid::~InteractiveGrid() {} // DESTRUCTOR
+InteractiveGrid::~InteractiveGrid() {}
 
 void InteractiveGrid::_ready(void) {
 	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
@@ -474,7 +474,7 @@ void InteractiveGrid::highlight_on_hover(godot::Vector3 global_position) {
 	}
 
 	// Retrieve the index of the cell that corresponds to the supplied
-	// global position.
+	// global position
 	int closest_index = get_cell_index_from_global_position(global_position);
 
 	// No cell under the mouse: clean the previously hovered cell (if any)
@@ -616,22 +616,18 @@ int InteractiveGrid::get_cell_index_from_global_position(godot::Vector3 global_p
 			_grid_offset.z = _grid_center_position.z - center_to_edge_z;
 
 			if (is_even_row) {
-				if (global_position.x > (_grid_center_position.x + center_to_edge_x - (_cell_size.x / 2)) ||
-						global_position.x < (_grid_center_position.x - center_to_edge_x - _cell_size.x)) {
+				if (global_position.x > (_grid_center_position.x + center_to_edge_x - (_cell_size.x / 2)) || global_position.x < (_grid_center_position.x - center_to_edge_x - _cell_size.x)) {
 					return -1;
 				}
-				if (global_position.z > (_grid_center_position.z + center_to_edge_z - (_cell_size.y / 2)) ||
-						global_position.z < (_grid_center_position.z - center_to_edge_z - _cell_size.y)) {
+				if (global_position.z > (_grid_center_position.z + center_to_edge_z - (_cell_size.y / 2)) || global_position.z < (_grid_center_position.z - center_to_edge_z - _cell_size.y)) {
 					return -1;
 				}
 			} else {
-				if (global_position.x > (_grid_center_position.x + center_to_edge_x + (_cell_size.x / 2)) ||
-						global_position.x < (_grid_center_position.x - center_to_edge_x - _cell_size.x)) {
+				if (global_position.x > (_grid_center_position.x + center_to_edge_x + (_cell_size.x / 2)) || global_position.x < (_grid_center_position.x - center_to_edge_x - _cell_size.x)) {
 					return -1;
 				}
 
-				if (global_position.z > (_grid_center_position.z + center_to_edge_z + (_cell_size.y / 2)) ||
-						global_position.z < (_grid_center_position.z - center_to_edge_z - _cell_size.y)) {
+				if (global_position.z > (_grid_center_position.z + center_to_edge_z + (_cell_size.y / 2)) || global_position.z < (_grid_center_position.z - center_to_edge_z - _cell_size.y)) {
 					return -1;
 				}
 			}
@@ -715,16 +711,16 @@ void InteractiveGrid::set_visible(bool visible) {
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	if (!(_flags & GFL_CREATED)) {
 		PrintLine(__FILE__, __FUNCTION__, __LINE__, "The grid has not been created");
-		return; // !Exit.
+		return; // !Exit
 	}
 
 	if ((_flags & GFL_VISIBLE) && !visible) {
-		// Visible.
+		// Visible
 		set_cells_visible(false);
 		PrintLine(__FILE__, __FUNCTION__, __LINE__, "setInteractiveGridVisible : false");
 		_flags &= ~GFL_VISIBLE;
 	} else if (!(_flags & GFL_VISIBLE) && visible) {
-		// Not visible.
+		// Not visible
 		set_cells_visible(true);
 		PrintLine(__FILE__, __FUNCTION__, __LINE__, "setInteractiveGridVisible : true");
 		_flags |= GFL_VISIBLE;
@@ -761,7 +757,7 @@ void InteractiveGrid::compute_inaccessible_cells(unsigned int start_cell_index) 
   Last Modified: October 09, 2025
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	if (is_cell_index_out_of_bounds(__FILE__, __FUNCTION__, __LINE__, start_cell_index)) {
-		return; // ! Exit.
+		return; // !Exit
 	}
 
 	if ((_flags & GFL_VISIBLE) && !(_flags & GFL_CELL_INACCESSIBLE_HIDDEN)) {
@@ -793,7 +789,7 @@ void InteractiveGrid::hide_distant_cells(unsigned int start_cell_index, float di
   Last Modified: October 09, 2025
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	if (is_cell_index_out_of_bounds(__FILE__, __FUNCTION__, __LINE__, start_cell_index)) {
-		return; // ! Exit.
+		return; // !Exit
 	}
 
 	if ((_flags & GFL_VISIBLE) && !(_flags & GFL_CELL_DISTANT_HIDDEN)) {
@@ -823,7 +819,7 @@ void InteractiveGrid::set_hover_enabled(bool enabled) {
 	M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	if (!(_flags & GFL_CREATED)) {
 		PrintLine(__FILE__, __FUNCTION__, __LINE__, "The grid has not been created");
-		return; // !Exit.
+		return; // !Exit
 	}
 
 	if (enabled) {
@@ -938,7 +934,7 @@ void InteractiveGrid::set_cell_walkable(unsigned int cell_index, bool is_walkabl
   Last Modified: October 07, 2025
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	if (is_cell_index_out_of_bounds(__FILE__, __FUNCTION__, __LINE__, cell_index)) {
-		return; // ! Exit.
+		return; // !Exit
 	}
 
 	if (is_walkable) {
@@ -958,7 +954,7 @@ void InteractiveGrid::set_cell_visible(unsigned int cell_index, bool is_visible)
   Last Modified: October 07, 2025
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	if (is_cell_index_out_of_bounds(__FILE__, __FUNCTION__, __LINE__, cell_index)) {
-		return; // ! Exit.
+		return; // !Exit
 	}
 
 	godot::Color current_cell_color = _cells.at(cell_index)->color;
@@ -981,7 +977,7 @@ void InteractiveGrid::InteractiveGrid::reset_cells_state() {
   Last Modified: October 10, 2025
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 
-	// Iterate through the cells.
+	// Iterate through the cells
 	for (int row = 0; row < _rows; row++) {
 		for (int column = 0; column < _columns; column++) {
 			const int index = row * _columns + column;
@@ -1004,7 +1000,7 @@ void InteractiveGrid::set_cell_color(unsigned int cell_index, const godot::Color
   Last Modified: October 11, 2025
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	if (is_cell_index_out_of_bounds(__FILE__, __FUNCTION__, __LINE__, cell_index)) {
-		return; // ! Exit.
+		return; // !Exit
 	}
 
 	if (_alpha_pass) {
@@ -1075,7 +1071,7 @@ void InteractiveGrid::select_cell(godot::Vector3 global_position) {
 	}
 
 	// Retrieve the index of the cell that corresponds to the supplied
-	// global position.
+	// global position
 	int closest_index = get_cell_index_from_global_position(global_position);
 
 	// If the index is valid
@@ -1387,7 +1383,8 @@ void InteractiveGrid::init_astar() {
 
 void InteractiveGrid::layout(godot::Vector3 center_position) {
 	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
-  Summary: ...
+  Summary: Positions the cells around the center according to the 
+           selected layout.
 
   Last Modified: October 07, 2025
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
@@ -1476,11 +1473,11 @@ void InteractiveGrid::layout_cells_as_hexagonal_grid(godot::Vector3 center_posit
 	const float pawn_to_grid_edge_x = (_columns / 2) * _cell_size.x;
 	const float pawn_to_grid_edge_z = (_rows / 2) * _cell_size.y;
 
-	//  Initialize the member `grid_offset_`.
+	//  Initialize the member `grid_offset_`
 	_grid_offset.x = center_position.x - pawn_to_grid_edge_x - _cell_size.x / 2;
 	_grid_offset.z = center_position.z - pawn_to_grid_edge_z - _cell_size.y;
 
-	// Iterate through the cells.
+	// Iterate through the cells
 	for (int row = 0; row < _rows; row++) {
 		for (int column = 0; column < _columns; column++) {
 			const int index = row * _columns + column; // Index in the 2D array stored as 1D
@@ -1545,7 +1542,7 @@ void InteractiveGrid::align_cells_with_floor() {
   Last Modified: October 10, 2025
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	if (_flags & GFL_CREATED) {
-		// Maximum raycast length.
+		// Maximum raycast length
 		const int ray_length{ 500 };
 
 		// Global transform of the MultiMeshInstance (position/rotation/scale in
@@ -1553,7 +1550,7 @@ void InteractiveGrid::align_cells_with_floor() {
 		const godot::Transform3D global_transform = _multimesh_instance->get_global_transform();
 
 		// Affine inverse: allows converting global coordinates into the local
-		// space.
+		// space
 		const godot::Transform3D global_to_local = global_transform.affine_inverse();
 
 		// Iterate through the cells
@@ -1563,7 +1560,7 @@ void InteractiveGrid::align_cells_with_floor() {
 						row * _columns + column; // Index in the 2D array stored as 1D
 
 				/*--------------------------------------------------------------------
-         Initialization of the starting coordinates and the ray.
+         Initialization of the starting coordinates and the ray
         --------------------------------------------------------------------*/
 
 				// Local origin of the cell (in the grid's local space)
@@ -1602,7 +1599,7 @@ void InteractiveGrid::align_cells_with_floor() {
 				godot::Dictionary result = space_state->intersect_ray(ray_query);
 
 				/*--------------------------------------------------------------------
-          Checks the validity of the hit mesh (ignores invisible objects).
+          Checks the validity of the hit mesh (ignores invisible objects)
         --------------------------------------------------------------------*/
 
 				if (!result.is_empty()) {
@@ -1621,7 +1618,7 @@ void InteractiveGrid::align_cells_with_floor() {
 					}
 
 					/*--------------------------------------------------------------------
-            Aligns the cell with the detected floor.
+            Aligns the cell with the detected floor
           --------------------------------------------------------------------*/
 
 					// Global position of the hit point
@@ -1634,7 +1631,8 @@ void InteractiveGrid::align_cells_with_floor() {
 					godot::Vector3 hit_position_local = global_to_local.xform(hit_position_global);
 
 					// Creates a new transform with the origin positioned on the floor
-					godot::Transform3D xform; xform.origin = hit_position_local;
+					godot::Transform3D xform;
+					xform.origin = hit_position_local;
 
 					// Aligns the Y axis with the floor normal
 					xform.basis.set_column(1, floor_normal.normalized()); // Y = floor normal
@@ -1768,18 +1766,18 @@ void InteractiveGrid::scan_environnement_obstacles() {
 
 					if (collider) {
 						// Log the detected collision, showing the node's name and its
-						// class.
+						// class
 
 						// ** Debug logs.
 						// PrintLine(__FILE__, __FUNCTION__, __LINE__,
 						// 		"[GridScan] Collision -> Node: " + collider->get_name() +
 						// 				" (Class: " + collider->get_class() + ")");
 
-						// Mark the grid cell as invalid (obstructed).
+						// Mark the grid cell as invalid (obstructed)
 
 						/*
 							Prevent cells that are above empty space and touching an obstacle
-							from being displayed.
+							from being displayed
 						*/
 						bool is_in_void = is_cell_in_void(index);
 
@@ -1849,7 +1847,7 @@ void InteractiveGrid::set_cell_inaccesible(unsigned int cell_index, bool is_inac
   Last Modified: October 07, 2025
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	if (is_cell_index_out_of_bounds(__FILE__, __FUNCTION__, __LINE__, cell_index)) {
-		return; // ! Exit.
+		return; // !Exit
 	}
 
 	if (is_inaccesible) {
@@ -1869,7 +1867,7 @@ void InteractiveGrid::set_cell_in_void(unsigned int cell_index, bool is_in_void)
   Last Modified: October 10, 2025
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	if (is_cell_index_out_of_bounds(__FILE__, __FUNCTION__, __LINE__, cell_index)) {
-		return; // ! Exit.
+		return; // !Exit
 	}
 
 	if (is_in_void) {
@@ -1887,7 +1885,7 @@ void InteractiveGrid::set_cell_hovered(unsigned int cell_index, bool is_hovered)
   Last Modified: October 07, 2025
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	if (is_cell_index_out_of_bounds(__FILE__, __FUNCTION__, __LINE__, cell_index)) {
-		return; // ! Exit.
+		return; // !Exit
 	}
 
 	if (is_hovered) {
@@ -1906,7 +1904,7 @@ void InteractiveGrid::set_cell_selected(unsigned int cell_index, bool is_selecte
   Last Modified: October 07, 2025
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	if (is_cell_index_out_of_bounds(__FILE__, __FUNCTION__, __LINE__, cell_index)) {
-		return; // ! Exit.
+		return; // !Exit
 	}
 
 	if (is_selected) {
@@ -1925,7 +1923,7 @@ void InteractiveGrid::set_cell_on_path(unsigned int cell_index, bool is_on_path)
   Last Modified: October 11, 2025
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	if (is_cell_index_out_of_bounds(__FILE__, __FUNCTION__, __LINE__, cell_index)) {
-		return; // ! Exit.
+		return; // !Exit
 	}
 
 	if (is_on_path) {

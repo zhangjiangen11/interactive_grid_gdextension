@@ -31,12 +31,12 @@ void vertex() {
 
 	int cell_flag = int(instance_c.a);
 
-	if ((cell_flag & CFL_WALKABLE) != 0) { // walkable.
+	if ((cell_flag & CFL_WALKABLE) != 0) { // Walkable
 		instance_c.a = 0.5;
 	}
 
     // Red pulse for invalid.
-    if ((cell_flag & CFL_WALKABLE) == 0) { // Unwalkable.
+    if ((cell_flag & CFL_WALKABLE) == 0) { // Unwalkable
 		float float_speed = 4.0;
 		float color_min = 0.3;
 		float color_max = 0.8;
@@ -62,7 +62,7 @@ void vertex() {
 		instance_c.a = 0.5;
     }
 
-	if ((cell_flag & CFL_VISIBLE) == 0) { // walkable.
+	if ((cell_flag & CFL_VISIBLE) == 0) {
 		instance_c.a = 0.0;
 	}
 }
