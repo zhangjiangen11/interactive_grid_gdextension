@@ -28,18 +28,18 @@
 			<return type="void" />
 			<param index="0" name="start_cell_index" type="int" />
 			<description>
-			Iterates over all grid cells and marks as unreachable those cells that
+				Iterates over all grid cells and marks as unreachable those cells that
 			cannot be reached from the specified start cell. Updates the visual
 			representation by applying `_unreachable_color` to the grid's MultiMesh.
 			Unreachable cells are not marked as unwalkable to allow gameplay features
 			such as teleportation.
 			</description>
 		</method>
-		<method name="get_cell_golbal_position" qualifiers="const">
+		<method name="get_cell_global_position" qualifiers="const">
 			<return type="Vector3" />
 			<param index="0" name="cell_index" type="int" />
 			<description>
-				Returns the global world‑space position of the cell identified by index.
+			Returns the global world‑space position of the cell identified by index.
 			</description>
 		</method>
 		<method name="get_cell_index_from_global_position">
@@ -65,7 +65,7 @@
 			<return type="PackedInt64Array" />
 			<param index="0" name="cell_index" type="int" />
 			<description>
-			Returns the indices of neighboring cells for the specified grid cell.
+				Returns the indices of neighboring cells for the specified grid cell.
 			</description>
 		</method>
 		<method name="get_path" qualifiers="const">
@@ -115,7 +115,7 @@
 			<return type="bool" />
 			<param index="0" name="cell_index" type="int" />
 			<description>
-			Returns true if the cell at the specified index is currently marked as unreachable.
+				Returns true if the cell at the specified index is currently marked as unreachable.
 			</description>
 		</method>
 		<method name="is_cell_selected" qualifiers="const">
@@ -183,7 +183,7 @@
 			<param index="0" name="cell_index" type="int" />
 			<param index="1" name="set_cell_reachable" type="bool" />
 			<description>
-			Sets whether a given grid cell is unreachable.
+				Sets whether a given grid cell is unreachable.
 			</description>
 		</method>
 		<method name="set_cell_walkable">

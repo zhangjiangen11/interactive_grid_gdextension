@@ -125,7 +125,7 @@ public:
 
 	// --- Grid position
 
-	godot::Vector3 get_cell_golbal_position(unsigned int cell_index) const;
+	godot::Vector3 get_cell_global_position(unsigned int cell_index) const;
 	int get_cell_index_from_global_position(godot::Vector3 global_position);
 	godot::Vector3 get_grid_center_global_position() const;
 	void center(godot::Vector3 center_position);

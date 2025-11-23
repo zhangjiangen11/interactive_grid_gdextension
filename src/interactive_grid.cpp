@@ -91,9 +91,10 @@ void InteractiveGrid::set_cell_size(const godot::Vector2 cell_size) {
   Summary: Sets the size of each cell in the grid. The provided 
            value will be stored and used for grid layout.
 
-  Last Modified: May 03, 2025
+  Last Modified: November 23, 2025
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	_cell_size = cell_size;
+	destroy();
 }
 
 godot::Vector2 InteractiveGrid::get_cell_size(void) const {
@@ -261,9 +262,10 @@ void InteractiveGrid::enable_alpha_pass(bool enabled) {
            Can be used within shader scripts to modify rendering
 		   behavior.
 
-  Last Modified: October 12, 2025
+  Last Modified: November 23, 2025
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	_alpha_pass = enabled;
+	destroy();
 }
 
 bool InteractiveGrid::is_alpha_pass_enabled() const {
@@ -439,7 +441,7 @@ void InteractiveGrid::highlight_path(const godot::PackedInt64Array &p_path) {
 	}
 }
 
-godot::Vector3 InteractiveGrid::get_cell_golbal_position(unsigned int cell_index) const {
+godot::Vector3 InteractiveGrid::get_cell_global_position(unsigned int cell_index) const {
 	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
   Summary: Returns the global world‑space position of the cell identified
            by index. The method fetches the cell’s Transform3D from the
@@ -1406,7 +1408,7 @@ void InteractiveGrid::_bind_methods() {
 	// --- Grid position
 
 	godot::ClassDB::bind_method(godot::D_METHOD("center", "center_position"), &InteractiveGrid::center);
-	godot::ClassDB::bind_method(godot::D_METHOD("get_cell_golbal_position", "cell_index"), &InteractiveGrid::get_cell_golbal_position);
+	godot::ClassDB::bind_method(godot::D_METHOD("get_cell_global_position", "cell_index"), &InteractiveGrid::get_cell_global_position);
 	godot::ClassDB::bind_method(godot::D_METHOD("get_cell_index_from_global_position", "global_position"), &InteractiveGrid::get_cell_index_from_global_position);
 	godot::ClassDB::bind_method(godot::D_METHOD("get_grid_center_global_position"), &InteractiveGrid::get_grid_center_global_position);
 
