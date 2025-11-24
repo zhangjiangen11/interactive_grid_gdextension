@@ -44,6 +44,17 @@ class InteractiveGrid : public godot::Node3D {
 private:
 	GDCLASS(InteractiveGrid, Node3D);
 
+	enum LAYOUT {
+		SQUARE = 0,
+		HEXAGONAL = 1,
+	};
+
+	enum MOVEMENT {
+		FOUR_DIRECTIONS = 0,
+		SIX_DIRECTIONS = 1,
+		EIGH_DIRECTIONS = 2,
+	};
+
 	struct DebugOptions {
 		bool print_logs_enabled = false;
 		bool print_execution_time_enabled = false;
@@ -79,39 +90,39 @@ private:
 	static constexpr int CFL_PATH = 1 << 5;
 	static constexpr int CFL_VISIBLE = 1 << 6;
 
-	void create();
-	void destroy();
+	void _create();
+	void _destroy();
 
 	// --- Grid initialization
 
-	void init_multi_mesh();
-	void init_astar();
+	void _init_multi_mesh();
+	void _init_astar();
 
 	// --- Grid position
 
-	void align_cells_with_floor();
-	void scan_environnement_obstacles();
+	void _align_cells_with_floor();
+	void _scan_environnement_obstacles();
 
 	// --- Grid layout
 
-	void layout(godot::Vector3 center_position);
-	void layout_cells_as_square_grid(godot::Vector3 center_position);
-	void layout_cells_as_hexagonal_grid(godot::Vector3 center_position);
+	void _layout(godot::Vector3 center_position);
+	void _layout_cells_as_square_grid(godot::Vector3 center_position);
+	void _layout_cells_as_hexagonal_grid(godot::Vector3 center_position);
 
 	// --- Grid materials
 
-	void apply_material(const godot::Ref<godot::Material> &p_material);
+	void _apply_material(const godot::Ref<godot::Material> &p_material);
 
 	// --- Grid visibility
 
-	void set_cells_visible(bool visible);
+	void _set_cells_visible(bool visible);
 
 	// --- Cell state
 
-	void set_cell_in_void(unsigned int cell_index, bool is_in_void);
-	void set_cell_hovered(unsigned int cell_index, bool is_hovered);
-	void set_cell_selected(unsigned int cell_index, bool is_selected);
-	void set_cell_on_path(unsigned int cell_index, bool is_on_path);
+	void _set_cell_in_void(unsigned int cell_index, bool is_in_void);
+	void _set_cell_hovered(unsigned int cell_index, bool is_hovered);
+	void _set_cell_selected(unsigned int cell_index, bool is_selected);
+	void _set_cell_on_path(unsigned int cell_index, bool is_on_path);
 
 	/*--------------------------------------------------------------------
     Grid data members
@@ -127,7 +138,7 @@ private:
 	godot::Vector3 _grid_offset = godot::Vector3(0.0f, 0.0f, 0.0f);
 	godot::Ref<godot::AStar2D> _astar;
 
-	unsigned int _layout{ 0 };
+	unsigned int _layout_index{ 0 };
 	unsigned int _movement{ 0 };
 	unsigned int _obstacles_collision_masks{ 1 << 13 }; // mask 14 = pow(2,13) = 1 << 13 = 8192
 	unsigned int _floor_collision_masks{ 1 << 14 }; // mask 15 = pow(2,14) = 1 << 14 = 16384
@@ -165,17 +176,6 @@ protected:
 	static void _bind_methods();
 
 public:
-	enum LAYOUT {
-		SQUARE = 0,
-		HEXAGONAL = 1,
-	};
-
-	enum MOVEMENT {
-		FOUR_DIRECTIONS = 0,
-		SIX_DIRECTIONS = 1,
-		EIGH_DIRECTIONS = 2,
-	};
-
 	InteractiveGrid();
 	~InteractiveGrid();
 

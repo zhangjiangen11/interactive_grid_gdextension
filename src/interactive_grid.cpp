@@ -18,7 +18,7 @@ Author: Antoine Charruel
 
 #include "interactive_grid.h"
 
-void InteractiveGrid::create() {
+void InteractiveGrid::_create() {
 	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
   Summary: Initializes the grid if it has not been created yet.
 
@@ -27,8 +27,8 @@ void InteractiveGrid::create() {
 	if (!(_flags & GFL_CREATED)) {
 		_grid_center_position = get_global_transform().origin;
 
-		init_multi_mesh();
-		init_astar();
+		_init_multi_mesh();
+		_init_astar();
 
 		_flags |= GFL_CREATED; // Mark as created to avoid duplication
 
@@ -42,7 +42,7 @@ void InteractiveGrid::create() {
 	}
 }
 
-void InteractiveGrid::destroy() {
+void InteractiveGrid::_destroy() {
 	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
   Summary: Frees all grid resources and resets state.
 
@@ -68,7 +68,7 @@ void InteractiveGrid::destroy() {
 	}
 }
 
-void InteractiveGrid::init_multi_mesh() {
+void InteractiveGrid::_init_multi_mesh() {
 	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
   Summary: Initializes and configures the MultiMesh used for rendering 
            the grid efficiently. MultiMesh enables high-
@@ -120,7 +120,7 @@ void InteractiveGrid::init_multi_mesh() {
 		}
 	}
 
-	apply_material(_material_override);
+	_apply_material(_material_override);
 	_flags |= GFL_VISIBLE;
 
 	if (_debug_options.print_logs_enabled) {
@@ -128,7 +128,7 @@ void InteractiveGrid::init_multi_mesh() {
 	}
 }
 
-void InteractiveGrid::init_astar() {
+void InteractiveGrid::_init_astar() {
 	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
   Summary: Initializes the A* pathfinding instance by creating a new 
            AStar2D object. Must be called before configuring points or
@@ -139,7 +139,7 @@ void InteractiveGrid::init_astar() {
 	_astar.instantiate(); // Create the AStar2D instance
 }
 
-void InteractiveGrid::layout(godot::Vector3 center_position) {
+void InteractiveGrid::_layout(godot::Vector3 center_position) {
 	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
   Summary: Positions the cells around the center according to the 
            selected layout.
@@ -152,17 +152,17 @@ void InteractiveGrid::layout(godot::Vector3 center_position) {
 		return; // !Exit
 	}
 
-	switch (_layout) {
+	switch (_layout_index) {
 		case LAYOUT::SQUARE:
-			layout_cells_as_square_grid(center_position);
+			_layout_cells_as_square_grid(center_position);
 			break;
 		case LAYOUT::HEXAGONAL:
-			layout_cells_as_hexagonal_grid(center_position);
+			_layout_cells_as_hexagonal_grid(center_position);
 			break;
 	}
 }
 
-void InteractiveGrid::layout_cells_as_square_grid(godot::Vector3 center_position) {
+void InteractiveGrid::_layout_cells_as_square_grid(godot::Vector3 center_position) {
 	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
   Summary: This method arranges the cells of the grid into a 
            square grid layout, positioning each cell relative to a pawn.
@@ -216,7 +216,7 @@ void InteractiveGrid::layout_cells_as_square_grid(godot::Vector3 center_position
 	}
 }
 
-void InteractiveGrid::layout_cells_as_hexagonal_grid(godot::Vector3 center_position) {
+void InteractiveGrid::_layout_cells_as_hexagonal_grid(godot::Vector3 center_position) {
 	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
   Summary: This method arranges the cells of the grid into a 
            hexagonal grid layout, positioning each cell relative to a pawn.
@@ -292,7 +292,7 @@ void InteractiveGrid::layout_cells_as_hexagonal_grid(godot::Vector3 center_posit
 	}
 }
 
-void InteractiveGrid::align_cells_with_floor() {
+void InteractiveGrid::_align_cells_with_floor() {
 	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
   Summary: Aligns each grid cell with the underlying floor
         using a vertical downward raycast.
@@ -429,7 +429,7 @@ void InteractiveGrid::align_cells_with_floor() {
 					// godot::print_line("New transformation of the cell: ", xform);
 				} else if (!godot::Engine::get_singleton()->is_editor_hint()) {
 					// In game
-					set_cell_in_void(index, true);
+					_set_cell_in_void(index, true);
 				} else {
 					// In editor
 					set_cell_walkable(index, true);
@@ -452,7 +452,7 @@ void InteractiveGrid::align_cells_with_floor() {
 	}
 }
 
-void InteractiveGrid::scan_environnement_obstacles() {
+void InteractiveGrid::_scan_environnement_obstacles() {
 	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
   Summary: Scans the game grid to detect obstacles and updates the 
            corresponding grid cells as walkable or unwalkable. For each 
@@ -582,7 +582,7 @@ void InteractiveGrid::scan_environnement_obstacles() {
 	}
 }
 
-void InteractiveGrid::apply_material(const godot::Ref<godot::Material> &p_material) {
+void InteractiveGrid::_apply_material(const godot::Ref<godot::Material> &p_material) {
 	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
   Summary: Applies the supplied material as an override to the grid’s
            MultiMeshInstance
@@ -604,7 +604,7 @@ void InteractiveGrid::apply_material(const godot::Ref<godot::Material> &p_materi
 	}
 }
 
-void InteractiveGrid::set_cells_visible(bool visible) {
+void InteractiveGrid::_set_cells_visible(bool visible) {
 	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
   Summary: Toggles the visual visibility of every cell in the grid.
 
@@ -626,10 +626,10 @@ void InteractiveGrid::set_cells_visible(bool visible) {
 		}
 	}
 
-	apply_material(_material_override);
+	_apply_material(_material_override);
 }
 
-void InteractiveGrid::set_cell_in_void(unsigned int cell_index, bool is_in_void) {
+void InteractiveGrid::_set_cell_in_void(unsigned int cell_index, bool is_in_void) {
 	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
   Summary: Marks a cell as being "in void" or not. If a cell is in void,
 	       it is hidden and flagged accordingly. Used to prevent cells
@@ -649,7 +649,7 @@ void InteractiveGrid::set_cell_in_void(unsigned int cell_index, bool is_in_void)
 	}
 }
 
-void InteractiveGrid::set_cell_hovered(unsigned int cell_index, bool is_hovered) {
+void InteractiveGrid::_set_cell_hovered(unsigned int cell_index, bool is_hovered) {
 	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
   Summary: Sets whether a particular grid cell (cell_index) is hovered.
 
@@ -667,7 +667,7 @@ void InteractiveGrid::set_cell_hovered(unsigned int cell_index, bool is_hovered)
 	}
 }
 
-void InteractiveGrid::set_cell_selected(unsigned int cell_index, bool is_selected) {
+void InteractiveGrid::_set_cell_selected(unsigned int cell_index, bool is_selected) {
 	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
   Summary: Sets whether a specific grid cell (cell_index) is marked as 
            selected.
@@ -686,7 +686,7 @@ void InteractiveGrid::set_cell_selected(unsigned int cell_index, bool is_selecte
 	}
 }
 
-void InteractiveGrid::set_cell_on_path(unsigned int cell_index, bool is_on_path) {
+void InteractiveGrid::_set_cell_on_path(unsigned int cell_index, bool is_on_path) {
 	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
   Summary: Sets whether a specific grid cell (cell_index) is part of the 
            current path.
@@ -856,7 +856,7 @@ void InteractiveGrid::_bind_methods() {
 InteractiveGrid::InteractiveGrid() {}
 
 InteractiveGrid::~InteractiveGrid() {
-	destroy();
+	_destroy();
 }
 
 void InteractiveGrid::_ready(void) {
@@ -874,11 +874,11 @@ void InteractiveGrid::_physics_process(double p_delta) {
 
   Last Modified: November 23, 2025
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-	create(); // Create the grid at startup
+	_create(); // Create the grid at startup
 
 	if (godot::Engine::get_singleton()->is_editor_hint()) {
 		if (_grid_center_position != get_global_transform().origin) {
-			destroy();
+			_destroy();
 		}
 	}
 }
@@ -890,7 +890,7 @@ void InteractiveGrid::set_rows(const unsigned int rows) {
   Last Modified: November 23, 2025
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	_rows = rows;
-	destroy();
+	_destroy();
 }
 
 int InteractiveGrid::get_rows(void) const {
@@ -909,7 +909,7 @@ void InteractiveGrid::set_columns(const unsigned int columns) {
   Last Modified: November 23, 2025
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	_columns = columns;
-	destroy();
+	_destroy();
 }
 
 int InteractiveGrid::get_columns(void) const {
@@ -929,7 +929,7 @@ void InteractiveGrid::set_cell_size(const godot::Vector2 cell_size) {
   Last Modified: November 23, 2025
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	_cell_size = cell_size;
-	destroy();
+	_destroy();
 }
 
 godot::Vector2 InteractiveGrid::get_cell_size(void) const {
@@ -950,7 +950,7 @@ void InteractiveGrid::set_cell_mesh(const godot::Ref<godot::Mesh> &p_mesh) {
   Last Modified: November 23, 2025
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	_cell_mesh = p_mesh;
-	destroy();
+	_destroy();
 }
 
 godot::Ref<godot::Mesh> InteractiveGrid::get_cell_mesh() const {
@@ -988,7 +988,7 @@ void InteractiveGrid::set_walkable_color(const godot::Color &p_color) {
   Last Modified: November 23, 2025
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	_walkable_color = p_color;
-	destroy();
+	_destroy();
 }
 
 godot::Color InteractiveGrid::get_walkable_color() const {
@@ -1007,7 +1007,7 @@ void InteractiveGrid::set_unwalkable_color(const godot::Color &p_color) {
   Last Modified: November 23, 2025
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	_unwalkable_color = p_color;
-	destroy();
+	_destroy();
 }
 
 godot::Color InteractiveGrid::get_unwalkable_color() const {
@@ -1100,7 +1100,7 @@ void InteractiveGrid::enable_alpha_pass(bool enabled) {
   Last Modified: November 23, 2025
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	_alpha_pass = enabled;
-	destroy();
+	_destroy();
 }
 
 bool InteractiveGrid::is_alpha_pass_enabled() const {
@@ -1121,7 +1121,7 @@ void InteractiveGrid::set_material_override(const godot::Ref<godot::Material> &p
   Last Modified: November 23, 2025
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	_material_override = p_material;
-	destroy();
+	_destroy();
 }
 
 godot::Ref<godot::Material> InteractiveGrid::get_material_override() const {
@@ -1210,7 +1210,7 @@ void InteractiveGrid::highlight_on_hover(godot::Vector3 global_position) {
 	// No cell under the mouse: clean the previously hovered cell (if any)
 	if (closest_index == -1 || !is_cell_visible(closest_index)) {
 		if (_hovered_cell_index > -1) {
-			set_cell_hovered(_hovered_cell_index, false);
+			_set_cell_hovered(_hovered_cell_index, false);
 
 			bool hovered_cell_is_selected = is_cell_selected(_hovered_cell_index);
 
@@ -1235,7 +1235,7 @@ void InteractiveGrid::highlight_on_hover(godot::Vector3 global_position) {
 	if (_hovered_cell_index > -1) {
 		bool old_is_selected = is_cell_selected(_hovered_cell_index);
 
-		set_cell_hovered(_hovered_cell_index, false);
+		_set_cell_hovered(_hovered_cell_index, false);
 
 		if (!old_is_selected) {
 			set_cell_color(_hovered_cell_index, _walkable_color);
@@ -1259,7 +1259,7 @@ void InteractiveGrid::highlight_on_hover(godot::Vector3 global_position) {
 	// If the new cell is not selected, mark it as hovered
 	if (!new_is_selected) {
 		_hovered_cell_index = closest_index;
-		set_cell_hovered(_hovered_cell_index, true);
+		_set_cell_hovered(_hovered_cell_index, true);
 	}
 }
 
@@ -1272,7 +1272,7 @@ void InteractiveGrid::highlight_path(const godot::PackedInt64Array &p_path) {
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	for (int step = 0; step < p_path.size(); step++) {
 		int cell_index = p_path[step];
-		set_cell_on_path(cell_index, true);
+		_set_cell_on_path(cell_index, true);
 	}
 }
 
@@ -1308,7 +1308,7 @@ int InteractiveGrid::get_cell_index_from_global_position(godot::Vector3 global_p
 	float center_to_edge_x{ 0.0f }, center_to_edge_z{ 0.0f };
 	bool is_even_row = (_rows % 2) == 0;
 
-	switch (_layout) {
+	switch (_layout_index) {
 		case LAYOUT::SQUARE:
 
 			// Calculate the distances between the center and the grid's edges
@@ -1414,9 +1414,9 @@ void InteractiveGrid::center(godot::Vector3 center_position) {
 
 	set_hover_enabled(false); // Prevent hover during grid recentering
 	reset_cells_state();
-	layout(center_position);
-	align_cells_with_floor();
-	scan_environnement_obstacles();
+	_layout(center_position);
+	_align_cells_with_floor();
+	_scan_environnement_obstacles();
 	configure_astar();
 	set_hover_enabled(true);
 
@@ -1440,8 +1440,8 @@ void InteractiveGrid::set_layout(unsigned int value) {
 
   	Last Modified: November 23, 2025
 	M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-	_layout = value;
-	destroy();
+	_layout_index = value;
+	_destroy();
 }
 
 unsigned int InteractiveGrid::get_layout() const {
@@ -1450,7 +1450,7 @@ unsigned int InteractiveGrid::get_layout() const {
 
 	Last Modified: October 05, 2025
 	M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-	return _layout;
+	return _layout_index;
 }
 
 void InteractiveGrid::set_visible(bool visible) {
@@ -1466,12 +1466,12 @@ void InteractiveGrid::set_visible(bool visible) {
 
 	if ((_flags & GFL_VISIBLE) && !visible) {
 		// Visible
-		set_cells_visible(false);
+		_set_cells_visible(false);
 		PrintLine(__FILE__, __FUNCTION__, __LINE__, "false.");
 		_flags &= ~GFL_VISIBLE;
 	} else if (!(_flags & GFL_VISIBLE) && visible) {
 		// Not visible
-		set_cells_visible(true);
+		_set_cells_visible(true);
 		PrintLine(__FILE__, __FUNCTION__, __LINE__, "true.");
 		_flags |= GFL_VISIBLE;
 	}
@@ -2099,7 +2099,7 @@ void InteractiveGrid::select_cell(godot::Vector3 global_position) {
 
 		bool walkable = is_cell_walkable(closest_index);
 		if (walkable) {
-			set_cell_selected(closest_index, true);
+			_set_cell_selected(closest_index, true);
 			_selected_cells.push_back(closest_index);
 		}
 	}
