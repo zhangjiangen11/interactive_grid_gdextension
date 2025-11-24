@@ -2208,12 +2208,13 @@ bool InteractiveGrid::is_cell_index_out_of_bounds(const godot::String &file, con
   Summary: Checks whether the specified cell index exceeds the valid 
            grid bounds.
 
-  Last Modified: October 21, 2025
+  Last Modified: November 24, 2025
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	bool is_out_of_bounds = false;
+	unsigned int grid_size = data.rows * data.columns;
 
-	if (cell_index >= (data.rows * data.columns)) {
-		PrintError(file, func, line, "Cell index out of bounds: ", cell_index, " >= ", (data.rows * data.columns));
+	if (cell_index >= (grid_size)) {
+		PrintError(file, func, line, "Cell index out of bounds: ", cell_index, " >= ", (grid_size));
 		is_out_of_bounds = true;
 	}
 
