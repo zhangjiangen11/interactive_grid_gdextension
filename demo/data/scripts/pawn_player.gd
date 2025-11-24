@@ -129,7 +129,7 @@ func reaching_cell_target(path: PackedInt64Array)-> void:
 	if path.size() > 1 and cells_traveled < path.size():
 	
 		var next_cell_index: int = path[cells_traveled+1]
-		var next_cell_global_position: Vector3 = interactive_grid.get_cell_golbal_position(next_cell_index)
+		var next_cell_global_position: Vector3 = interactive_grid.get_cell_global_position(next_cell_index)
 		
 		# Move the player toward the target cell.
 		move_player_to(next_cell_global_position.x, next_cell_global_position.z)
@@ -182,7 +182,7 @@ func is_on_target_cell()-> bool:
 	var selected_cells: Array = interactive_grid.get_selected_cells()
 	
 	if selected_cells.size() > 0:
-		target_cell = interactive_grid.get_cell_golbal_position(selected_cells[0])
+		target_cell = interactive_grid.get_cell_global_position(selected_cells[0])
 	
 	if self.global_position.distance_to(target_cell) <= _DISTANCE_THRESHOLD:
 		is_on_target = true
