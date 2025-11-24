@@ -583,7 +583,6 @@ void InteractiveGrid::center(godot::Vector3 center_position) {
 	align_cells_with_floor();
 	scan_environnement_obstacles();
 	configure_astar();
-
 	set_hover_enabled(true);
 
 	_flags |= GFL_CENTERED;
