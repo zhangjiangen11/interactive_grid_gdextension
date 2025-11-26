@@ -851,6 +851,68 @@ void InteractiveGrid3D::_configure_astar_8_dir() {
 	}
 }
 
+void InteractiveGrid3D::_breadth_first_search(unsigned int start_cell_index) {
+	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
+	Summary: Performs a breadth-first search from a given start cell to 
+			 identify which walkable grid cells are reachable. This 
+			 traversal ignores non-walkable (blocked) cells and marks
+			 only valid reachable tiles.
+	M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+
+	struct BSFNode {
+		int index{ 0 };
+		bool visited{ false };
+		bool is_walkable{ false };
+		bool is_reachable{ false };
+		godot::PackedInt64Array neighbors{};
+	};
+
+	unsigned int grid_size = data.rows * data.columns;
+	godot::Vector<BSFNode> graph;
+	graph.resize(grid_size);
+
+	// Init nodes
+	for (int index = 0; index < grid_size; index++) {
+		graph.write[index].is_walkable = is_cell_walkable(index);
+		graph.write[index].is_reachable = is_cell_reachable(index);
+		graph.write[index].is_reachable = is_cell_reachable(index);
+		graph.write[index].neighbors = get_neighbors(index);
+	}
+
+	std::queue<int> q; // FIFO queue for BFS
+
+	graph.write[start_cell_index].visited = true;
+	q.push(start_cell_index);
+
+	// BFS loop
+	while (!q.empty()) {
+		int current = q.front(); // take the node at the front of the queue
+		q.pop(); // remove it from the queue
+
+		if (!graph[current].is_walkable) {
+			continue;
+		}
+
+		// Explore all neighbors of the current node
+		for (int neighbor : graph[current].neighbors) {
+			if (!graph[neighbor].is_walkable) {
+				continue;
+			}
+
+			if (!graph[neighbor].visited) {
+				q.push(neighbor);
+				graph.write[neighbor].visited = true;
+			}
+		}
+	}
+
+	// Mark unreachable walkable cells
+	for (int index = 0; index < grid_size; index++) {
+		if (graph[index].is_walkable && !graph[index].visited)
+			set_cell_reachable(index, false);
+	}
+}
+
 void InteractiveGrid3D::_bind_methods() {
 	/*F+F+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	Summary: _bind_methods, is a static function that Godot will call to 
@@ -1547,8 +1609,7 @@ void InteractiveGrid3D::compute_unreachable_cells(unsigned int start_cell_index)
 
 	if ((data.flags & GFL_VISIBLE) && !(data.flags & GFL_CELL_UNREACHABLE_HIDDEN)) {
 		_configure_astar();
-		breadth_first_search(start_cell_index);
-
+		_breadth_first_search(start_cell_index);
 		data.flags |= GFL_CELL_UNREACHABLE_HIDDEN;
 	}
 
@@ -1557,68 +1618,6 @@ void InteractiveGrid3D::compute_unreachable_cells(unsigned int start_cell_index)
 	if (_debug_options.print_execution_time_enabled) {
 		std::chrono::duration<double, std::milli> duration = end - start;
 		PrintLine(__FILE__, __FUNCTION__, __LINE__, "Execution time (ms): ", duration.count());
-	}
-}
-
-void InteractiveGrid3D::breadth_first_search(unsigned int start_cell_index) {
-	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
-	Summary: Performs a breadth-first search from a given start cell to 
-			 identify which walkable grid cells are reachable. This 
-			 traversal ignores non-walkable (blocked) cells and marks
-			 only valid reachable tiles.
-	M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-
-	struct BSFNode {
-		int index{ 0 };
-		bool visited{ false };
-		bool is_walkable{ false };
-		bool is_reachable{ false };
-		godot::PackedInt64Array neighbors{};
-	};
-
-	unsigned int grid_size = data.rows * data.columns;
-	godot::Vector<BSFNode> graph;
-	graph.resize(grid_size);
-
-	// Init nodes
-	for (int index = 0; index < grid_size; index++) {
-		graph.write[index].is_walkable = is_cell_walkable(index);
-		graph.write[index].is_reachable = is_cell_reachable(index);
-		graph.write[index].is_reachable = is_cell_reachable(index);
-		graph.write[index].neighbors = get_neighbors(index);
-	}
-
-	std::queue<int> q; // FIFO queue for BFS
-
-	graph.write[start_cell_index].visited = true;
-	q.push(start_cell_index);
-
-	// BFS loop
-	while (!q.empty()) {
-		int current = q.front(); // take the node at the front of the queue
-		q.pop(); // remove it from the queue
-
-		if (!graph[current].is_walkable) {
-			continue;
-		}
-
-		// Explore all neighbors of the current node
-		for (int neighbor : graph[current].neighbors) {
-			if (!graph[neighbor].is_walkable) {
-				continue;
-			}
-
-			if (!graph[neighbor].visited) {
-				q.push(neighbor);
-				graph.write[neighbor].visited = true;
-			}
-		}
-	}
-
-	// Mark unreachable walkable cells
-	for (int index = 0; index < grid_size; index++) {
-		if (graph[index].is_walkable && !graph[index].visited)
-			set_cell_reachable(index, false);
 	}
 }
 

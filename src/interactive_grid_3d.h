@@ -130,6 +130,8 @@ private:
 	void _configure_astar_6_dir();
 	void _configure_astar_8_dir();
 
+	void _breadth_first_search(unsigned int start_cell_index);
+
 	/*--------------------------------------------------------------------
     Grid data members
   --------------------------------------------------------------------*/
@@ -270,7 +272,6 @@ public:
 	// --- Compute
 
 	void compute_unreachable_cells(unsigned int start_cell_index);
-	void breadth_first_search(unsigned int start_cell_index);
 
 	void hide_distant_cells(unsigned int start_cell_index, float distance);
 	void set_hover_enabled(bool enabled);
