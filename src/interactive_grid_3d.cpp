@@ -40,7 +40,7 @@ void InteractiveGrid3D::_create() {
 	}
 }
 
-void InteractiveGrid3D::_destroy() {
+void InteractiveGrid3D::_delete() {
 	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
   Summary: Frees all grid resources and resets state.
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
@@ -820,7 +820,7 @@ void InteractiveGrid3D::_bind_methods() {
 InteractiveGrid3D::InteractiveGrid3D() {}
 
 InteractiveGrid3D::~InteractiveGrid3D() {
-	_destroy();
+	_delete();
 }
 
 void InteractiveGrid3D::_ready(void) {
@@ -838,7 +838,7 @@ void InteractiveGrid3D::_physics_process(double p_delta) {
 
 	if (godot::Engine::get_singleton()->is_editor_hint()) {
 		if (data.grid_center_position != get_global_transform().origin) {
-			_destroy();
+			_delete();
 		}
 	}
 }
@@ -848,7 +848,7 @@ void InteractiveGrid3D::set_rows(const unsigned int rows) {
   Summary: Sets the number of rows in the grid.
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	data.rows = rows;
-	_destroy();
+	_delete();
 }
 
 int InteractiveGrid3D::get_rows(void) const {
@@ -863,7 +863,7 @@ void InteractiveGrid3D::set_columns(const unsigned int columns) {
   Summary: Sets the number of columns in the grid.
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	data.columns = columns;
-	_destroy();
+	_delete();
 }
 
 int InteractiveGrid3D::get_columns(void) const {
@@ -879,7 +879,7 @@ void InteractiveGrid3D::set_cell_size(const godot::Vector2 cell_size) {
            value will be stored and used for grid layout.
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	data.cell_size = cell_size;
-	_destroy();
+	_delete();
 }
 
 godot::Vector2 InteractiveGrid3D::get_cell_size(void) const {
@@ -896,7 +896,7 @@ void InteractiveGrid3D::set_cell_mesh(const godot::Ref<godot::Mesh> &p_mesh) {
   Summary: Sets the mesh used for each cell of the grid.
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	data.cell_mesh = p_mesh;
-	_destroy();
+	_delete();
 }
 
 godot::Ref<godot::Mesh> InteractiveGrid3D::get_cell_mesh() const {
@@ -926,7 +926,7 @@ void InteractiveGrid3D::set_walkable_color(const godot::Color &p_color) {
   Summary: Sets the walkable color for the grid.
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	data.walkable_color = p_color;
-	_destroy();
+	_delete();
 }
 
 godot::Color InteractiveGrid3D::get_walkable_color() const {
@@ -941,7 +941,7 @@ void InteractiveGrid3D::set_unwalkable_color(const godot::Color &p_color) {
   Summary: Sets the unwalkable color for the grid.
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	data.unwalkable_color = p_color;
-	_destroy();
+	_delete();
 }
 
 godot::Color InteractiveGrid3D::get_unwalkable_color() const {
@@ -1012,7 +1012,7 @@ void InteractiveGrid3D::set_material_override(const godot::Ref<godot::Material> 
   Summary: Sets the material override for the grid.
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	data.material_override = p_material;
-	_destroy();
+	_delete();
 }
 
 godot::Ref<godot::Material> InteractiveGrid3D::get_material_override() const {
@@ -1314,7 +1314,7 @@ void InteractiveGrid3D::set_layout(unsigned int value) {
 	Summary: Sets the grid layout.
 	M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	data.layout_index = value;
-	_destroy();
+	_delete();
 }
 
 unsigned int InteractiveGrid3D::get_layout() const {

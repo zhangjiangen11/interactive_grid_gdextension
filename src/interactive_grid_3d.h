@@ -90,7 +90,7 @@ private:
 	static constexpr int CFL_VISIBLE = 1 << 6;
 
 	void _create();
-	void _destroy();
+	void _delete();
 
 	// --- Grid initialization
 
