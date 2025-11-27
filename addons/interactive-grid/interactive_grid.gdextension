@@ -4,10 +4,6 @@ entry_symbol = "interactive_grid_library_init"
 compatibility_minimum = "4.5"
 reloadable = true
 
-[icons]
-
-InteractiveGrid3D = "res://data/editor/icons/InteractiveGrid3D.svg"
-
 [libraries]
 ; Relative paths ensure that our GDExtension can be placed anywhere in the project directory.
 macos.single.debug = "./macos/libinteractive_grid.macos.template_debug.dylib"
@@ -59,3 +55,7 @@ web.wasm32.single.debug = "./web/libinteractive_grid.web.template_debug.wasm32.n
 web.wasm32.double.debug = "./web/libinteractive_grid.web.template_release.wasm32.double.nothreads.wasm"
 web.wasm32.single.release = "./web/libinteractive_grid.web.template_release.wasm32.nothreads.wasm"
 web.wasm32.double.release = "./web/libinteractive_grid.web.template_release.wasm32.double.nothreads.wasm"
+
+[icons]
+
+InteractiveGrid3D = "res://addons/interactive-grid_v1.5.1/data/editor/icons/InteractiveGrid3D.svg"
