@@ -1495,8 +1495,6 @@ int InteractiveGrid3D::get_cell_index_from_global_position(godot::Vector3 global
 				center_to_grid_edge_x -= data.cell_size.x / 2;
 			}
 
-			godot::print_line("top_left_global_position", data.top_left_global_position);
-
 			if (global_position.x < (data.top_left_global_position.x - data.cell_size.x / 2)) {
 				return -1;
 			}
