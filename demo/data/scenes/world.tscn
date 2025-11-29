@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://b6dh75ey4vefh"]
+[gd_scene load_steps=17 format=3 uid="uid://b6dh75ey4vefh"]
 
 [ext_resource type="PackedScene" uid="uid://causf6bjt06hi" path="res://data/scenes/main.tscn" id="1_fh8d7"]
 [ext_resource type="PackedScene" uid="uid://c7nyakvh08r3u" path="res://data/scenes/camp.tscn" id="2_c8ggi"]
@@ -122,6 +122,14 @@ volumetric_fog_density = 0.01
 volumetric_fog_albedo = Color(0.843137, 0.737255, 0.329412, 1)
 volumetric_fog_emission = Color(0.843137, 0.737255, 0.329412, 1)
 
+[sub_resource type="BoxMesh" id="BoxMesh_wtkja"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cv6ia"]
+albedo_color = Color(1, 0, 0, 1)
+
+[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_wtkja"]
+data = PackedVector3Array(-0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, -0.5, -0.5, -0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, -0.5, -0.5, 0.5, 0.5, 0.5, -0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, -0.5, -0.5)
+
 [node name="World" type="Node3D"]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
@@ -142,3 +150,14 @@ transform = Transform3D(1.4064668, 0, 1.421918, 0, 2, 0, -1.421918, 0, 1.4064668
 visible = false
 
 [node name="camp" parent="." instance=ExtResource("2_c8ggi")]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.0190105, -3.3168888, 13.531503)
+mesh = SubResource("BoxMesh_wtkja")
+surface_material_override/0 = SubResource("StandardMaterial3D_cv6ia")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="MeshInstance3D"]
+collision_layer = 8193
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D/StaticBody3D"]
+shape = SubResource("ConcavePolygonShape3D_wtkja")

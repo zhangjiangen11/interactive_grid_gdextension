@@ -5,12 +5,12 @@ Summary: InteractiveGrid3D is a Godot 4.5 GDExtension that allows player
          interaction with a 3D grid, including cell selection,
 		 pathfinding, and hover highlights.
 
-Last Modified: November 28, 2025
+Last Modified: November 29, 2025
 
 This file is part of the InteractiveGrid3D GDExtension Source Code.
 Repository: https://github.com/antoinecharruel/interactive_grid
 
-Version InteractiveGrid3D: 1.6.0
+Version InteractiveGrid3D: 1.7.0
 Version: Godot Engine v4.5.stable.steam - https://godotengine.org
 
 Author: Antoine Charruel
@@ -702,8 +702,16 @@ void InteractiveGrid3D::_scan_environnement_obstacles() {
 		   marked as invalid (unwalkable), while cells without collisions 
 		   are marked as valid (walkable). Debug logs are generated to 
 		   provide information about the collision results.
+
+	ref: https://docs.godotengine.org/en/3.0/classes/class_meshinstance.html?highlight=meshinstance#member-function-description
+
+	https://www.reddit.com/r/godot/comments/9gz26w/generate_collision_shape_of_mesh_from_code/?rdt=37796
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	if (!(data.flags & GFL_VISIBLE)) {
+		return;
+	}
+
+	if (data.cell_mesh.is_null()) {
 		return;
 	}
 
@@ -718,8 +726,16 @@ void InteractiveGrid3D::_scan_environnement_obstacles() {
 
 	// Prepare the shape if it has not been created yet
 	if (data.obstacle_shape.is_null()) {
-		data.obstacle_shape.instantiate();
-		data.obstacle_shape->set_size(godot::Vector3(data.cell_size.x, 1.0, data.cell_size.y));
+		data.obstacle_shape = data.cell_mesh->create_convex_shape();
+		godot::Ref<godot::ConvexPolygonShape3D> convex_shape = data.obstacle_shape;
+		godot::PackedVector3Array points = convex_shape->get_points();
+
+		for (int i = 0; i < points.size(); i++) {
+			points[i] *= get_collision_detection_shape_scale();
+		}
+
+		convex_shape->set_points(points);
+		data.obstacle_shape = convex_shape;
 	}
 
 	auto start = std::chrono::high_resolution_clock::now();
@@ -1003,6 +1019,11 @@ void InteractiveGrid3D::_bind_methods() {
 	godot::ClassDB::bind_method(godot::D_METHOD("set_movement", "value"), &InteractiveGrid3D::set_movement);
 	godot::ClassDB::bind_method(godot::D_METHOD("get_movement"), &InteractiveGrid3D::get_movement);
 
+	// Collision.
+
+	godot::ClassDB::bind_method(godot::D_METHOD("set_collision_detection_shape_scale", "value"), &InteractiveGrid3D::set_collision_detection_shape_scale);
+	godot::ClassDB::bind_method(godot::D_METHOD("get_collision_detection_shape_scale"), &InteractiveGrid3D::get_collision_detection_shape_scale);
+
 	// Grid visibility.
 
 	godot::ClassDB::bind_method(godot::D_METHOD("set_visible", "visible"), &InteractiveGrid3D::set_visible);
@@ -1068,6 +1089,7 @@ void InteractiveGrid3D::_bind_methods() {
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::OBJECT, "_material_override", godot::PROPERTY_HINT_RESOURCE_TYPE, "Material"), "set_material_override", "get_material_override");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::INT, "layout", godot::PROPERTY_HINT_ENUM, "SQUARE, HEXAGONAL"), "set_layout", "get_layout");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::INT, "movement", godot::PROPERTY_HINT_ENUM, "FOUR-DIRECTIONS,SIX-DIRECTIONS,EIGH-DIRECTIONS"), "set_movement", "get_movement");
+	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::VECTOR3, "collision_detection_shape_scale"), "set_collision_detection_shape_scale", "get_collision_detection_shape_scale");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::INT, "obstacles_collision_masks", godot::PROPERTY_HINT_LAYERS_3D_RENDER), "set_obstacles_collision_masks", "get_obstacles_collision_masks");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::INT, "floor_collision_masks", godot::PROPERTY_HINT_LAYERS_3D_RENDER), "set_grid_floor_collision_masks", "get_grid_floor_collision_masks");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::BOOL, "print_logs_enabled"), "set_print_logs_enabled", "is_print_logs_enabled");
@@ -1191,6 +1213,21 @@ unsigned int InteractiveGrid3D::get_movement() const {
            grid.
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	return data.movement;
+}
+
+void InteractiveGrid3D::set_collision_detection_shape_scale(godot::Vector3 size) {
+	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
+  Summary: Returns the current scale of the collision detection shape.
+  M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+	data.collision_detection_shape_scale = size;
+	_delete();
+}
+
+godot::Vector3 InteractiveGrid3D::get_collision_detection_shape_scale() const {
+	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
+  Summary: Sets the scale for the collision detection shape.
+  M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+	return data.collision_detection_shape_scale;
 }
 
 void InteractiveGrid3D::set_walkable_color(const godot::Color &p_color) {
@@ -1525,12 +1562,10 @@ int InteractiveGrid3D::get_cell_index_from_global_position(godot::Vector3 global
 
 			if (is_even_row) {
 				if (global_position.z > (data.top_left_global_position.z + center_to_grid_edge_z * 2 + hex_circumradius + hex_side_length / 2)) {
-					godot::print_line("is_even_row true");
 					return -1;
 				}
 			} else {
 				if (global_position.z > (data.top_left_global_position.z + center_to_grid_edge_z * 2 + hex_circumradius)) {
-					godot::print_line("is_even_row false");
 					return -1;
 				}
 			}

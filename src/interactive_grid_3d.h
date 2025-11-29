@@ -5,12 +5,12 @@ Summary: InteractiveGrid is a Godot 4.5 GDExtension that allows player
          interaction with a 3D grid, including cell selection, 
 		 pathfinding, and hover highlights.
 
-Last Modified: November 28, 2025
+Last Modified: November 29, 2025
 
 This file is part of the InteractiveGrid GDExtension Source Code.
 Repository: https://github.com/antoinecharruel/interactive_grid
 
-Version InteractiveGrid: 1.6.0
+Version InteractiveGrid: 1.7.0
 Version: Godot Engine v4.5.stable.steam - https://godotengine.org
 
 Author: Antoine Charruel
@@ -23,6 +23,8 @@ Author: Antoine Charruel
 // Godot engine
 #include <godot_cpp/classes/a_star2d.hpp>
 #include <godot_cpp/classes/box_shape3d.hpp>
+#include <godot_cpp/classes/concave_polygon_shape3d.hpp>
+#include <godot_cpp/classes/convex_polygon_shape3d.hpp>
 #include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/mesh_instance3d.hpp>
 #include <godot_cpp/classes/multi_mesh.hpp>
@@ -31,6 +33,7 @@ Author: Antoine Charruel
 #include <godot_cpp/classes/physics_ray_query_parameters3d.hpp>
 #include <godot_cpp/classes/physics_shape_query_parameters3d.hpp>
 #include <godot_cpp/classes/shader_material.hpp>
+#include <godot_cpp/classes/static_body3d.hpp>
 #include <godot_cpp/classes/world3d.hpp>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/templates/vector.hpp>
@@ -131,7 +134,6 @@ private:
 	void _set_cell_selected(unsigned int cell_index, bool is_selected);
 	void _set_cell_on_path(unsigned int cell_index, bool is_on_path);
 
-
 	/*--------------------------------------------------------------------
     Grid data members
   --------------------------------------------------------------------*/
@@ -178,7 +180,8 @@ private:
 
 		// Scan environnement.
 
-		godot::Ref<godot::BoxShape3D> obstacle_shape;
+		godot::Ref<godot::ConvexPolygonShape3D> obstacle_shape;
+		godot::Vector3 collision_detection_shape_scale = godot::Vector3(1.0f, 1.0f, 1.0f);
 
 	} data;
 
@@ -215,9 +218,12 @@ public:
 
 	void set_layout(unsigned int value);
 	unsigned get_layout() const;
-	
+
 	void set_movement(unsigned int value);
 	unsigned int get_movement() const;
+
+	void set_collision_detection_shape_scale(godot::Vector3 shape);
+	godot::Vector3 get_collision_detection_shape_scale() const;
 
 	// --- Grid colors
 

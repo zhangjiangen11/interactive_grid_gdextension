@@ -56,6 +56,9 @@ _cell_mesh = SubResource("CylinderMesh_dkjo2")
 _material_override = SubResource("ShaderMaterial_yeeyf")
 layout = 1
 movement = 1
+collision_detection_shape_scale = Vector3(0.9, 45, 0.9)
+print_logs_enabled = true
+print_execution_time = true
 script = ExtResource("4_w868w")
 
 [node name="top_left_debug_mesh" type="CSGMesh3D" parent="InteractiveGrid3D"]
