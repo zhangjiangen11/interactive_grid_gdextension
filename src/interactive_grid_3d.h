@@ -108,6 +108,14 @@ private:
 	void _layout_cells_as_square_grid(godot::Vector3 center_position);
 	void _layout_cells_as_hexagonal_grid(godot::Vector3 center_position);
 
+	// Astar.
+
+	void _configure_astar();
+	void _configure_astar_4_dir();
+	void _configure_astar_6_dir();
+	void _configure_astar_8_dir();
+	void _breadth_first_search(unsigned int start_cell_index);
+
 	// Grid materials.
 
 	void _apply_material(const godot::Ref<godot::Material> &p_material);
@@ -123,14 +131,6 @@ private:
 	void _set_cell_selected(unsigned int cell_index, bool is_selected);
 	void _set_cell_on_path(unsigned int cell_index, bool is_on_path);
 
-	// Astar.
-
-	void _configure_astar();
-	void _configure_astar_4_dir();
-	void _configure_astar_6_dir();
-	void _configure_astar_8_dir();
-
-	void _breadth_first_search(unsigned int start_cell_index);
 
 	/*--------------------------------------------------------------------
     Grid data members
@@ -213,6 +213,9 @@ public:
 
 	// --- Layout
 
+	void set_layout(unsigned int value);
+	unsigned get_layout() const;
+	
 	void set_movement(unsigned int value);
 	unsigned int get_movement() const;
 
@@ -260,11 +263,6 @@ public:
 	godot::Vector3 get_grid_center_global_position() const;
 	godot::Vector3 get_top_left_global_position() const;
 	void center(godot::Vector3 center_position);
-
-	// --- Grid layout
-
-	void set_layout(unsigned int value);
-	unsigned get_layout() const;
 
 	// --- Grid visibility
 

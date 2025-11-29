@@ -296,6 +296,244 @@ void InteractiveGrid3D::_layout_cells_as_hexagonal_grid(godot::Vector3 center_po
 	}
 }
 
+void InteractiveGrid3D::_configure_astar() {
+	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
+	Summary: // TODO
+	M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+	if (godot::Engine::get_singleton()->is_editor_hint()) {
+		return; // ! Exit
+	}
+
+	auto start = std::chrono::high_resolution_clock::now();
+
+	data.astar->clear();
+
+	// Register all grid points and mark obstacles
+	for (int index = 0; index < data.cells.size(); ++index) {
+		int x = index % data.columns;
+		int y = index / data.columns;
+		data.astar->add_point(index, godot::Vector2(x, y), 1.0);
+		data.astar->set_point_disabled(index, !is_cell_walkable(index));
+	}
+
+	switch (data.movement) {
+		case MOVEMENT::FOUR_DIRECTIONS:
+			_configure_astar_4_dir();
+			break;
+		case MOVEMENT::SIX_DIRECTIONS:
+			_configure_astar_6_dir(); // Hexagonal
+			break;
+		case MOVEMENT::EIGH_DIRECTIONS:
+			_configure_astar_8_dir();
+			break;
+	}
+
+	auto end = std::chrono::high_resolution_clock::now();
+
+	if (_debug_options.print_execution_time_enabled) {
+		std::chrono::duration<double, std::milli> duration = end - start;
+		PrintLine(__FILE__, __FUNCTION__, __LINE__, "Execution time (ms): ", duration.count());
+	}
+}
+
+void InteractiveGrid3D::_configure_astar_4_dir() {
+	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
+  Summary: Configures the A* pathfinding graph for four directions movement.
+           Each cell is connected to its four immediate neighbors (up, 
+		   down, left, right) if they exist.
+  M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+	for (int row = 0; row < data.rows; row++) {
+		for (int column = 0; column < data.columns; column++) {
+			const int index = row * data.columns + column;
+
+			// Connect to the right
+			if (column + 1 < data.columns) {
+				int right = row * data.columns + (column + 1);
+				data.astar->connect_points(index, right);
+				data.cells.at(index)->neighbors.push_back(right);
+			}
+
+			// Connect to the left
+			if (column - 1 >= 0) {
+				int left = row * data.columns + (column - 1);
+				//_astar->connect_points(index, left);
+				data.cells.at(index)->neighbors.push_back(left);
+			}
+
+			// Connect to the down
+			if (row + 1 < data.rows) {
+				int down = (row + 1) * data.columns + column;
+				data.astar->connect_points(index, down);
+				data.cells.at(index)->neighbors.push_back(down);
+			}
+
+			// Connect to the up
+			if (row - 1 >= 0) {
+				int up = (row - 1) * data.columns + column;
+				//_astar->connect_points(index, up);
+				data.cells.at(index)->neighbors.push_back(up);
+			}
+		}
+	}
+}
+
+void InteractiveGrid3D::_configure_astar_6_dir() {
+	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
+	  Summary: Configures the A* pathfinding graph for six directions 
+	           movement (hexagonal grid). Each cell is connected to its 
+			   six immediate neighbors if they exist and are walkable.
+
+	  Reference: Patel, A. J. (2013). Hexagonal grids. 
+	             https://www.redblobgames.com/grids/hexagons/#neighbors
+	  M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+	const int even_directions[6][2] = {
+		{ +1, 0 }, // East
+		{ -1, 0 }, // West
+		{ 0, -1 }, // North-East
+		{ -1, -1 }, // North-West
+		{ 0, +1 }, // South-East
+		{ -1, +1 } // South-West
+	};
+
+	const int odd_directions[6][2] = {
+		{ +1, 0 }, // East
+		{ -1, 0 }, // West
+		{ +1, -1 }, // North-East
+		{ 0, -1 }, // North-West
+		{ +1, +1 }, // South-East
+		{ 0, +1 } // South-West
+	};
+
+	for (int row = 0; row < data.rows; row++) {
+		for (int column = 0; column < data.columns; column++) {
+			const int index = row * data.columns + column;
+
+			if (!is_cell_walkable(index))
+				continue;
+
+			const int(*dirs)[2] = (row % 2 == 0) ? even_directions : odd_directions;
+
+			// Iterate over the 6 directions
+			for (int d = 0; d < 6; d++) {
+				int nx = column + dirs[d][0];
+				int ny = row + dirs[d][1];
+
+				if (nx >= 0 && nx < data.columns && ny >= 0 && ny < data.rows) {
+					int neighbor_index = ny * data.columns + nx;
+
+					if (is_cell_walkable(neighbor_index)) {
+						// Add the neighbor if it doesn't already exist
+						if (!data.astar->has_point(neighbor_index)) {
+							data.astar->add_point(neighbor_index, godot::Vector2(nx, ny));
+						}
+
+						data.astar->connect_points(index, neighbor_index);
+						data.cells.at(index)->neighbors.push_back(neighbor_index);
+					}
+				}
+			}
+		}
+	}
+}
+
+void InteractiveGrid3D::_configure_astar_8_dir() {
+	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
+  Summary: Configures the A* pathfinding graph for eight directions 
+  		   movement. Each cell is connected to all eight neighboring 
+		   cells if the neighbor is walkable.
+  M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+
+	// Create 8-direction connections
+	for (int row = 0; row < data.rows; row++) {
+		for (int column = 0; column < data.columns; column++) {
+			const int index = row * data.columns + column;
+
+			for (int row_offset = -1; row_offset <= 1; ++row_offset) {
+				for (int col_offset = -1; col_offset <= 1; ++col_offset) {
+					if (col_offset == 0 && row_offset == 0)
+						continue; // Do not connect to itself
+
+					int nx = column + col_offset;
+					int ny = row + row_offset;
+
+					if (nx >= 0 && nx < data.columns && ny >= 0 && ny < data.rows) {
+						int neighbor_index = ny * data.columns + nx;
+
+						// Check if the neighbor is walkable before connecting
+						bool neighbor_walkable = is_cell_walkable(neighbor_index);
+						if (neighbor_walkable) {
+							data.astar->connect_points(index, neighbor_index);
+							data.cells.at(index)->neighbors.push_back(neighbor_index);
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+void InteractiveGrid3D::_breadth_first_search(unsigned int start_cell_index) {
+	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
+	Summary: Performs a breadth-first search from a given start cell to 
+			 identify which walkable grid cells are reachable. This 
+			 traversal ignores non-walkable (blocked) cells and marks
+			 only valid reachable tiles.
+	M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+
+	struct BSFNode {
+		int index{ 0 };
+		bool visited{ false };
+		bool is_walkable{ false };
+		bool is_reachable{ false };
+		godot::PackedInt64Array neighbors{};
+	};
+
+	unsigned int grid_size = data.rows * data.columns;
+	godot::Vector<BSFNode> graph;
+	graph.resize(grid_size);
+
+	// Init nodes
+	for (int index = 0; index < grid_size; index++) {
+		graph.write[index].is_walkable = is_cell_walkable(index);
+		graph.write[index].is_reachable = is_cell_reachable(index);
+		graph.write[index].is_reachable = is_cell_reachable(index);
+		graph.write[index].neighbors = get_neighbors(index);
+	}
+
+	std::queue<int> q; // FIFO queue for BFS
+
+	graph.write[start_cell_index].visited = true;
+	q.push(start_cell_index);
+
+	// BFS loop
+	while (!q.empty()) {
+		int current = q.front(); // take the node at the front of the queue
+		q.pop(); // remove it from the queue
+
+		if (!graph[current].is_walkable) {
+			continue;
+		}
+
+		// Explore all neighbors of the current node
+		for (int neighbor : graph[current].neighbors) {
+			if (!graph[neighbor].is_walkable) {
+				continue;
+			}
+
+			if (!graph[neighbor].visited) {
+				q.push(neighbor);
+				graph.write[neighbor].visited = true;
+			}
+		}
+	}
+
+	// Mark unreachable walkable cells
+	for (int index = 0; index < grid_size; index++) {
+		if (graph[index].is_walkable && !graph[index].visited)
+			set_cell_reachable(index, false);
+	}
+}
+
 void InteractiveGrid3D::_align_cells_with_floor() {
 	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
   Summary: Aligns each grid cell with the underlying floor
@@ -693,244 +931,6 @@ void InteractiveGrid3D::_set_cell_on_path(unsigned int cell_index, bool is_on_pa
 	}
 }
 
-void InteractiveGrid3D::_configure_astar() {
-	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
-	Summary: // TODO
-	M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-	if (godot::Engine::get_singleton()->is_editor_hint()) {
-		return; // ! Exit
-	}
-
-	auto start = std::chrono::high_resolution_clock::now();
-
-	data.astar->clear();
-
-	// Register all grid points and mark obstacles
-	for (int index = 0; index < data.cells.size(); ++index) {
-		int x = index % data.columns;
-		int y = index / data.columns;
-		data.astar->add_point(index, godot::Vector2(x, y), 1.0);
-		data.astar->set_point_disabled(index, !is_cell_walkable(index));
-	}
-
-	switch (data.movement) {
-		case MOVEMENT::FOUR_DIRECTIONS:
-			_configure_astar_4_dir();
-			break;
-		case MOVEMENT::SIX_DIRECTIONS:
-			_configure_astar_6_dir(); // Hexagonal
-			break;
-		case MOVEMENT::EIGH_DIRECTIONS:
-			_configure_astar_8_dir();
-			break;
-	}
-
-	auto end = std::chrono::high_resolution_clock::now();
-
-	if (_debug_options.print_execution_time_enabled) {
-		std::chrono::duration<double, std::milli> duration = end - start;
-		PrintLine(__FILE__, __FUNCTION__, __LINE__, "Execution time (ms): ", duration.count());
-	}
-}
-
-void InteractiveGrid3D::_configure_astar_4_dir() {
-	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
-  Summary: Configures the A* pathfinding graph for four directions movement.
-           Each cell is connected to its four immediate neighbors (up, 
-		   down, left, right) if they exist.
-  M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-	for (int row = 0; row < data.rows; row++) {
-		for (int column = 0; column < data.columns; column++) {
-			const int index = row * data.columns + column;
-
-			// Connect to the right
-			if (column + 1 < data.columns) {
-				int right = row * data.columns + (column + 1);
-				data.astar->connect_points(index, right);
-				data.cells.at(index)->neighbors.push_back(right);
-			}
-
-			// Connect to the left
-			if (column - 1 >= 0) {
-				int left = row * data.columns + (column - 1);
-				//_astar->connect_points(index, left);
-				data.cells.at(index)->neighbors.push_back(left);
-			}
-
-			// Connect to the down
-			if (row + 1 < data.rows) {
-				int down = (row + 1) * data.columns + column;
-				data.astar->connect_points(index, down);
-				data.cells.at(index)->neighbors.push_back(down);
-			}
-
-			// Connect to the up
-			if (row - 1 >= 0) {
-				int up = (row - 1) * data.columns + column;
-				//_astar->connect_points(index, up);
-				data.cells.at(index)->neighbors.push_back(up);
-			}
-		}
-	}
-}
-
-void InteractiveGrid3D::_configure_astar_6_dir() {
-	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
-	  Summary: Configures the A* pathfinding graph for six directions 
-	           movement (hexagonal grid). Each cell is connected to its 
-			   six immediate neighbors if they exist and are walkable.
-
-	  Reference: Patel, A. J. (2013). Hexagonal grids. 
-	             https://www.redblobgames.com/grids/hexagons/#neighbors
-	  M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-	const int even_directions[6][2] = {
-		{ +1, 0 }, // East
-		{ -1, 0 }, // West
-		{ 0, -1 }, // North-East
-		{ -1, -1 }, // North-West
-		{ 0, +1 }, // South-East
-		{ -1, +1 } // South-West
-	};
-
-	const int odd_directions[6][2] = {
-		{ +1, 0 }, // East
-		{ -1, 0 }, // West
-		{ +1, -1 }, // North-East
-		{ 0, -1 }, // North-West
-		{ +1, +1 }, // South-East
-		{ 0, +1 } // South-West
-	};
-
-	for (int row = 0; row < data.rows; row++) {
-		for (int column = 0; column < data.columns; column++) {
-			const int index = row * data.columns + column;
-
-			if (!is_cell_walkable(index))
-				continue;
-
-			const int(*dirs)[2] = (row % 2 == 0) ? even_directions : odd_directions;
-
-			// Iterate over the 6 directions
-			for (int d = 0; d < 6; d++) {
-				int nx = column + dirs[d][0];
-				int ny = row + dirs[d][1];
-
-				if (nx >= 0 && nx < data.columns && ny >= 0 && ny < data.rows) {
-					int neighbor_index = ny * data.columns + nx;
-
-					if (is_cell_walkable(neighbor_index)) {
-						// Add the neighbor if it doesn't already exist
-						if (!data.astar->has_point(neighbor_index)) {
-							data.astar->add_point(neighbor_index, godot::Vector2(nx, ny));
-						}
-
-						data.astar->connect_points(index, neighbor_index);
-						data.cells.at(index)->neighbors.push_back(neighbor_index);
-					}
-				}
-			}
-		}
-	}
-}
-
-void InteractiveGrid3D::_configure_astar_8_dir() {
-	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
-  Summary: Configures the A* pathfinding graph for eight directions 
-  		   movement. Each cell is connected to all eight neighboring 
-		   cells if the neighbor is walkable.
-  M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-
-	// Create 8-direction connections
-	for (int row = 0; row < data.rows; row++) {
-		for (int column = 0; column < data.columns; column++) {
-			const int index = row * data.columns + column;
-
-			for (int row_offset = -1; row_offset <= 1; ++row_offset) {
-				for (int col_offset = -1; col_offset <= 1; ++col_offset) {
-					if (col_offset == 0 && row_offset == 0)
-						continue; // Do not connect to itself
-
-					int nx = column + col_offset;
-					int ny = row + row_offset;
-
-					if (nx >= 0 && nx < data.columns && ny >= 0 && ny < data.rows) {
-						int neighbor_index = ny * data.columns + nx;
-
-						// Check if the neighbor is walkable before connecting
-						bool neighbor_walkable = is_cell_walkable(neighbor_index);
-						if (neighbor_walkable) {
-							data.astar->connect_points(index, neighbor_index);
-							data.cells.at(index)->neighbors.push_back(neighbor_index);
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
-void InteractiveGrid3D::_breadth_first_search(unsigned int start_cell_index) {
-	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
-	Summary: Performs a breadth-first search from a given start cell to 
-			 identify which walkable grid cells are reachable. This 
-			 traversal ignores non-walkable (blocked) cells and marks
-			 only valid reachable tiles.
-	M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-
-	struct BSFNode {
-		int index{ 0 };
-		bool visited{ false };
-		bool is_walkable{ false };
-		bool is_reachable{ false };
-		godot::PackedInt64Array neighbors{};
-	};
-
-	unsigned int grid_size = data.rows * data.columns;
-	godot::Vector<BSFNode> graph;
-	graph.resize(grid_size);
-
-	// Init nodes
-	for (int index = 0; index < grid_size; index++) {
-		graph.write[index].is_walkable = is_cell_walkable(index);
-		graph.write[index].is_reachable = is_cell_reachable(index);
-		graph.write[index].is_reachable = is_cell_reachable(index);
-		graph.write[index].neighbors = get_neighbors(index);
-	}
-
-	std::queue<int> q; // FIFO queue for BFS
-
-	graph.write[start_cell_index].visited = true;
-	q.push(start_cell_index);
-
-	// BFS loop
-	while (!q.empty()) {
-		int current = q.front(); // take the node at the front of the queue
-		q.pop(); // remove it from the queue
-
-		if (!graph[current].is_walkable) {
-			continue;
-		}
-
-		// Explore all neighbors of the current node
-		for (int neighbor : graph[current].neighbors) {
-			if (!graph[neighbor].is_walkable) {
-				continue;
-			}
-
-			if (!graph[neighbor].visited) {
-				q.push(neighbor);
-				graph.write[neighbor].visited = true;
-			}
-		}
-	}
-
-	// Mark unreachable walkable cells
-	for (int index = 0; index < grid_size; index++) {
-		if (graph[index].is_walkable && !graph[index].visited)
-			set_cell_reachable(index, false);
-	}
-}
-
 void InteractiveGrid3D::_bind_methods() {
 	/*F+F+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	Summary: _bind_methods, is a static function that Godot will call to 
@@ -998,6 +998,11 @@ void InteractiveGrid3D::_bind_methods() {
 	godot::ClassDB::bind_method(godot::D_METHOD("set_layout", "value"), &InteractiveGrid3D::set_layout);
 	godot::ClassDB::bind_method(godot::D_METHOD("get_layout"), &InteractiveGrid3D::get_layout);
 
+	// Astar.
+
+	godot::ClassDB::bind_method(godot::D_METHOD("set_movement", "value"), &InteractiveGrid3D::set_movement);
+	godot::ClassDB::bind_method(godot::D_METHOD("get_movement"), &InteractiveGrid3D::get_movement);
+
 	// Grid visibility.
 
 	godot::ClassDB::bind_method(godot::D_METHOD("set_visible", "visible"), &InteractiveGrid3D::set_visible);
@@ -1034,11 +1039,6 @@ void InteractiveGrid3D::_bind_methods() {
 	godot::ClassDB::bind_method(godot::D_METHOD("set_grid_floor_collision_masks", "masks"), &InteractiveGrid3D::set_grid_floor_collision_masks);
 	godot::ClassDB::bind_method(godot::D_METHOD("get_grid_floor_collision_masks"), &InteractiveGrid3D::get_grid_floor_collision_masks);
 
-	// Astar.
-
-	godot::ClassDB::bind_method(godot::D_METHOD("set_movement", "value"), &InteractiveGrid3D::set_movement);
-	godot::ClassDB::bind_method(godot::D_METHOD("get_movement"), &InteractiveGrid3D::get_movement);
-
 	// User interaction.
 
 	godot::ClassDB::bind_method(godot::D_METHOD("select_cell", "global_position"), &InteractiveGrid3D::select_cell);
@@ -1067,9 +1067,9 @@ void InteractiveGrid3D::_bind_methods() {
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::COLOR, "hovered color"), "set_hovered_color", "get_hovered_color");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::OBJECT, "_material_override", godot::PROPERTY_HINT_RESOURCE_TYPE, "Material"), "set_material_override", "get_material_override");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::INT, "layout", godot::PROPERTY_HINT_ENUM, "SQUARE, HEXAGONAL"), "set_layout", "get_layout");
+	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::INT, "movement", godot::PROPERTY_HINT_ENUM, "FOUR-DIRECTIONS,SIX-DIRECTIONS,EIGH-DIRECTIONS"), "set_movement", "get_movement");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::INT, "obstacles_collision_masks", godot::PROPERTY_HINT_LAYERS_3D_RENDER), "set_obstacles_collision_masks", "get_obstacles_collision_masks");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::INT, "floor_collision_masks", godot::PROPERTY_HINT_LAYERS_3D_RENDER), "set_grid_floor_collision_masks", "get_grid_floor_collision_masks");
-	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::INT, "movement", godot::PROPERTY_HINT_ENUM, "FOUR-DIRECTIONS,SIX-DIRECTIONS,EIGH-DIRECTIONS"), "set_movement", "get_movement");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::BOOL, "print_logs_enabled"), "set_print_logs_enabled", "is_print_logs_enabled");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::BOOL, "print_execution_time"), "set_print_execution_time_enabled", "is_print_execution_time_enabled");
 }
@@ -1161,6 +1161,21 @@ godot::Ref<godot::Mesh> InteractiveGrid3D::get_cell_mesh() const {
   Summary:  Returns the mesh used for each cell of the grid.
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	return data.cell_mesh;
+}
+
+void InteractiveGrid3D::set_layout(unsigned int value) {
+	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
+	Summary: Sets the grid layout.
+	M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+	data.layout_index = value;
+	_delete();
+}
+
+unsigned int InteractiveGrid3D::get_layout() const {
+	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
+	Summary: Returns the current grid layout.
+	M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+	return data.layout_index;
 }
 
 void InteractiveGrid3D::set_movement(unsigned int value) {
@@ -1593,21 +1608,6 @@ void InteractiveGrid3D::center(godot::Vector3 center_position) {
 	if (_debug_options.print_logs_enabled) {
 		PrintLine(__FILE__, __FUNCTION__, __LINE__, "Grid centered.");
 	}
-}
-
-void InteractiveGrid3D::set_layout(unsigned int value) {
-	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
-	Summary: Sets the grid layout.
-	M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-	data.layout_index = value;
-	_delete();
-}
-
-unsigned int InteractiveGrid3D::get_layout() const {
-	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
-	Summary: Returns the current grid layout.
-	M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-	return data.layout_index;
 }
 
 void InteractiveGrid3D::set_visible(bool visible) {
