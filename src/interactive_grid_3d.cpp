@@ -702,10 +702,6 @@ void InteractiveGrid3D::_scan_environnement_obstacles() {
 		   marked as invalid (unwalkable), while cells without collisions 
 		   are marked as valid (walkable). Debug logs are generated to 
 		   provide information about the collision results.
-
-	ref: https://docs.godotengine.org/en/3.0/classes/class_meshinstance.html?highlight=meshinstance#member-function-description
-
-	https://www.reddit.com/r/godot/comments/9gz26w/generate_collision_shape_of_mesh_from_code/?rdt=37796
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	if (!(data.flags & GFL_VISIBLE)) {
 		return;
@@ -1657,12 +1653,16 @@ void InteractiveGrid3D::set_visible(bool visible) {
 	if ((data.flags & GFL_VISIBLE) && !visible) {
 		// Visible
 		_set_cells_visible(false);
-		PrintLine(__FILE__, __FUNCTION__, __LINE__, "false.");
+		if (_debug_options.print_logs_enabled) {
+			PrintLine(__FILE__, __FUNCTION__, __LINE__, "false.");
+		}
 		data.flags &= ~GFL_VISIBLE;
 	} else if (!(data.flags & GFL_VISIBLE) && visible) {
 		// Not visible
 		_set_cells_visible(true);
-		PrintLine(__FILE__, __FUNCTION__, __LINE__, "true.");
+		if (_debug_options.print_logs_enabled) {
+			PrintLine(__FILE__, __FUNCTION__, __LINE__, "true.");
+		}
 		data.flags |= GFL_VISIBLE;
 	}
 }
