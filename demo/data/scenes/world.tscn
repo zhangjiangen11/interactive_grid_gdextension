@@ -145,14 +145,19 @@ directional_shadow_max_distance = 40.0
 [node name="Main" parent="." instance=ExtResource("1_fh8d7")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.0592103, 0.32895422, 9.158834)
 
+[node name="InteractiveGrid3D" parent="Main" index="2"]
+print_logs_enabled = true
+print_execution_time = true
+
+[node name="camp" parent="." instance=ExtResource("2_c8ggi")]
+
 [node name="LightningTools" parent="." instance=ExtResource("5_t61oy")]
 transform = Transform3D(1.4064668, 0, 1.421918, 0, 2, 0, -1.421918, 0, 1.4064668, -11.293724, 5.3920174, -4.7425556)
 visible = false
 
-[node name="camp" parent="." instance=ExtResource("2_c8ggi")]
-
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.0190105, -3.3168888, 13.531503)
+visible = false
 mesh = SubResource("BoxMesh_wtkja")
 surface_material_override/0 = SubResource("StandardMaterial3D_cv6ia")
 
@@ -161,3 +166,7 @@ collision_layer = 8193
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D/StaticBody3D"]
 shape = SubResource("ConcavePolygonShape3D_wtkja")
+
+[editable path="Main"]
+[editable path="Main/PawnPlayer"]
+[editable path="Main/TryMe"]
