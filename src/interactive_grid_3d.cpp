@@ -593,7 +593,7 @@ void InteractiveGrid3D::_align_cells_with_floor() {
 				// Sets up the parameters for the raycast query
 				godot::Ref<godot::PhysicsRayQueryParameters3D> ray_query;
 				ray_query.instantiate();
-				ray_query->set_collide_with_areas(false); // Ignores Area3D nodes
+				ray_query->set_collide_with_areas(true); // Ignores Area3D nodes
 				ray_query->set_from(global_from); // Starting point of the ray
 				ray_query->set_to(global_to); // End point of the ray
 
@@ -759,11 +759,9 @@ void InteractiveGrid3D::_scan_environnement_obstacles() {
 			// Define which collision layers will be considered by this query
 			query->set_collision_mask(data.obstacles_collision_masks);
 
-			// Enable collision checks with PhysicsBody3D (e.g., walls, obstacles, characters)
+			// Enable collision.
 			query->set_collide_with_bodies(true);
-
-			// Disable collision checks with Area3D to avoid detecting sensor-only volumes
-			query->set_collide_with_areas(false);
+			query->set_collide_with_areas(true);
 
 			// Perform the physics query: check which objects intersect the given
 			// shape. Returns up to 32 results, each stored as a Dictionary
