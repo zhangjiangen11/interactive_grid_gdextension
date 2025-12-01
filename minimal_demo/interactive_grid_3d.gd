@@ -5,18 +5,18 @@
 #
 # Node: InteractiveGrid (InteractiveGrid).
 #
-# Last modified: October 25, 2025
+# Last modified: December 01, 2025
 #
 # This file is part of the InteractiveGrid GDExtension Source Code.
 # Repository: https://github.com/antoinecharruel/interactive_grid_gdextension
 #
-# Version InteractiveGrid: 1.1.1
-# Version: Godot Engine v4.5.stable.steam - https://godotengine.org
+# Version InteractiveGrid: 1.7.1
+# Godot Version: Godot Engine v4.5.stable.steam - https://godotengine.org
 #
 # Author: Antoine Charruel
 # =================================================================================================
 
-extends InteractiveGrid
+extends InteractiveGrid3D
 
 @onready var pawn: CharacterBody3D = $".."
 @onready var ray_cast_from_mouse: RayCast3D = $"../../RayCastFromMouse"
@@ -46,7 +46,7 @@ func _input(event):
 				# ! Info: every time center is called, the state of the cells is reset.
 				self.center(pawn.global_position)
 				
-				var index_cell_pawn: int = self.get_cell_index_from_global_position(pawn.global_position)
+				var pawn_cell_index: int = self.get_cell_index_from_global_position(pawn.global_position)
 				
 				# Manually set cell as unwalkable.
 				# set_cell_walkable(75, false);
@@ -55,8 +55,7 @@ func _input(event):
 				# print("Cell 75 is walkable ? : ", is_cell_walkable(75))
 				
  				# Hides distant cells.
-				self.hide_distant_cells(index_cell_pawn, 6)	
-				self.compute_inaccessible_cells(index_cell_pawn)
+				self.hide_distant_cells(pawn_cell_index, 6)
 				
 				# Manually set cell color.
 				# var color_cell = Color(0.3, 0.4, 0.9)
@@ -75,21 +74,22 @@ func _input(event):
 			if pawn && ray_cast_from_mouse:
 				# Select a cell.
 				if self.get_selected_cells().is_empty():
-					self.select_cell(ray_cast_from_mouse.get_ray_intersection_position())
+					var selected_cell_index = get_cell_index_from_global_position(ray_cast_from_mouse.get_ray_intersection_position())
+					self.select_cell(selected_cell_index)
 				
 				# Retrieve the selected cells.
 				var selected_cells: Array = self.get_selected_cells()
 				if selected_cells.size() > 0:
 					
-					get_cell_golbal_position(selected_cells[0])
+					get_cell_global_position(selected_cells[0])
 
-					var index_cell_pawn = self.get_cell_index_from_global_position(self.get_grid_center_global_position())
-					print("Pawn index: ", index_cell_pawn)
+					var pawn_cell_index = self.get_cell_index_from_global_position(self.get_grid_center_global_position())
+					print("Pawn index: ", pawn_cell_index)
 					
 					# Retrieve the path.
 					var path: PackedInt64Array
-					path = self.get_path(index_cell_pawn, selected_cells[0]) # only the first one.
-					#path = self.get_path(index_cell_pawn, self.get_latest_selected()) # the last one.
+					path = self.get_path(pawn_cell_index, selected_cells[0]) # only the first one.
+					#path = self.get_path(pawn_cell_index, self.get_latest_selected()) # the last one.
 					print("Last selected cell:", self.get_latest_selected())
 					print("Path:", path)
 					

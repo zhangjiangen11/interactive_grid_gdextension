@@ -10,8 +10,8 @@ config_version=5
 
 [application]
 
-config/name="test"
-run/main_scene="uid://cfrhyxgrw488v"
+config/name="minimal_demo"
+run/main_scene="uid://csk13c66hrj0y"
 config/features=PackedStringArray("4.5", "GL Compatibility")
 config/icon="res://icon.svg"
 
