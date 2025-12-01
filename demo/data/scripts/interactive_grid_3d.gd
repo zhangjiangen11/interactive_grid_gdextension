@@ -107,7 +107,8 @@ func _input(event):
 		
 		if selected_cells.size() < 1:
 			# Retrieve the selected cells.
-			self.select_cell(ray_cast_from_mouse.get_ray_intersection_position())
+			var selected_cell: int = get_cell_index_from_global_position(ray_cast_from_mouse.get_ray_intersection_position())
+			self.select_cell(selected_cell)
 			
 			# Select a cell.
 			if self.get_selected_cells().is_empty():

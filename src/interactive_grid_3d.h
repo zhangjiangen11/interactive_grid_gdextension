@@ -320,7 +320,7 @@ public:
 
 	// --- User interaction
 
-	void select_cell(godot::Vector3 global_position);
+	void select_cell(unsigned int cell_index);
 	godot::Array get_selected_cells();
 	int get_latest_selected();
 	godot::PackedInt64Array get_path(unsigned int start_cell_index, unsigned int target_cell_index) const;

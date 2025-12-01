@@ -1959,7 +1959,7 @@ int InteractiveGrid3D::get_grid_floor_collision_masks() {
 	return data.floor_collision_masks;
 }
 
-void InteractiveGrid3D::select_cell(godot::Vector3 global_position) {
+void InteractiveGrid3D::select_cell(unsigned int cell_index) {
 	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
   Summary: Selects a grid cell based on a world‑space position.
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
@@ -1969,29 +1969,26 @@ void InteractiveGrid3D::select_cell(godot::Vector3 global_position) {
 		return; // !Exit
 	}
 
-	// Retrieve the index of the cell that corresponds to the supplied
-	// global position
-	int closest_index = get_cell_index_from_global_position(global_position);
+	if (is_cell_index_out_of_bounds(__FILE__, __FUNCTION__, __LINE__, cell_index)) {
+		return; // !Exit
+	}
 
-	// If the index is valid
-	if (closest_index != -1) {
-		// Skip invisible
-		bool visible = is_cell_visible(closest_index);
-		if (!visible) {
-			return;
-		}
+	// Skip invisible
+	bool visible = is_cell_visible(cell_index);
+	if (!visible) {
+		return;
+	}
 
-		// Skip unreachable cells
-		bool unreachable = !is_cell_reachable(closest_index);
-		if (unreachable) {
-			return;
-		}
+	// Skip unreachable cells
+	bool unreachable = !is_cell_reachable(cell_index);
+	if (unreachable) {
+		return;
+	}
 
-		bool walkable = is_cell_walkable(closest_index);
-		if (walkable) {
-			_set_cell_selected(closest_index, true);
-			data.selected_cells.push_back(closest_index);
-		}
+	bool walkable = is_cell_walkable(cell_index);
+	if (walkable) {
+		_set_cell_selected(cell_index, true);
+		data.selected_cells.push_back(cell_index);
 	}
 }
 
