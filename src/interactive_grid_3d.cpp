@@ -25,6 +25,7 @@ void InteractiveGrid3D::_create() {
 	if (!(data.flags & GFL_CREATED)) {
 		data.center_global_position = get_global_transform().origin;
 
+		_init_cell_flags();
 		_init_multi_mesh();
 		_init_astar();
 
@@ -62,6 +63,12 @@ void InteractiveGrid3D::_delete() {
 
 		data.flags &= ~GFL_CREATED;
 	}
+}
+
+void InteractiveGrid3D::_init_cell_flags() {
+	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
+  Summary: // TODO
+  M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 }
 
 void InteractiveGrid3D::_init_multi_mesh() {
@@ -981,6 +988,10 @@ void InteractiveGrid3D::_bind_methods() {
 	godot::ClassDB::bind_method(godot::D_METHOD("set_hovered_color"), &InteractiveGrid3D::set_hovered_color);
 	godot::ClassDB::bind_method(godot::D_METHOD("get_hovered_color"), &InteractiveGrid3D::get_hovered_color);
 
+	// TODO
+	godot::ClassDB::bind_method(godot::D_METHOD("set_custom_cell_data"), &InteractiveGrid3D::set_custom_cell_data);
+	godot::ClassDB::bind_method(godot::D_METHOD("get_custom_cell_data"), &InteractiveGrid3D::get_custom_cell_data);
+
 	// Grid materials.
 
 	godot::ClassDB::bind_method(godot::D_METHOD("get_material_override"), &InteractiveGrid3D::get_material_override);
@@ -1037,7 +1048,7 @@ void InteractiveGrid3D::_bind_methods() {
 	godot::ClassDB::bind_method(godot::D_METHOD("set_cell_reachable", "cell_index", "set_cell_reachable"), &InteractiveGrid3D::set_cell_reachable);
 
 	// Cell color.
-
+	// TODO ??
 	godot::ClassDB::bind_method(godot::D_METHOD("set_cell_color", "cell_index", "color"), &InteractiveGrid3D::set_cell_color);
 
 	// Masks.
@@ -1074,6 +1085,17 @@ void InteractiveGrid3D::_bind_methods() {
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::COLOR, "selected color"), "set_selected_color", "get_selected_color");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::COLOR, "path color"), "set_path_color", "get_path_color");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::COLOR, "hovered color"), "set_hovered_color", "get_hovered_color");
+
+	// TODO
+	//ADD_PROPERTY(godot::PropertyInfo(godot::Variant::DICTIONARY, "custom_cell_flags", godot::PROPERTY_HINT_TYPE_STRING, "String;Color"), "set_custom_cell_flags", "get_custom_cell_flags");
+	//ADD_PROPERTY(godot::PropertyInfo(godot::Variant::DICTIONARY, "custom_cell_flags", godot::PROPERTY_HINT_NONE, "int;String;Color"), "set_custom_cell_flags", "get_custom_cell_flags");
+	//ADD_PROPERTY(godot::PropertyInfo(godot::Variant::DICTIONARY, "custom_cell_flags", godot::PROPERTY_HINT_NONE), "set_custom_cell_flags", "get_custom_cell_flags");
+
+	ADD_PROPERTY(
+			godot::PropertyInfo(godot::Variant::OBJECT, "custom_cell_data", godot::PROPERTY_HINT_RESOURCE_TYPE, "CustomCellData"), "set_custom_cell_data", "get_custom_cell_data");
+
+	//ADD_PROPERTY(PropertyInfo(Variant::DICTIONARY, "keyword_colors", PROPERTY_HINT_TYPE_STRING, "String;Color"), "set_keyword_colors", "get_keyword_colors");
+
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::OBJECT, "_material_override", godot::PROPERTY_HINT_RESOURCE_TYPE, "Material"), "set_material_override", "get_material_override");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::INT, "layout", godot::PROPERTY_HINT_ENUM, "SQUARE, HEXAGONAL"), "set_layout", "get_layout");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::INT, "movement", godot::PROPERTY_HINT_ENUM, "FOUR-DIRECTIONS,SIX-DIRECTIONS,EIGH-DIRECTIONS"), "set_movement", "get_movement");
@@ -1302,6 +1324,20 @@ godot::Color InteractiveGrid3D::get_hovered_color() const {
   Summary: Returns the hovered color for the grid.
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	return data.hovered_color;
+}
+
+void InteractiveGrid3D::set_custom_cell_data(const godot::Ref<CustomCellData> &p_custom_cell_flag) {
+	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
+  Summary: // TODO
+  M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+	data.custom_cell_data = p_custom_cell_flag;
+}
+
+godot::Ref<CustomCellData> InteractiveGrid3D::get_custom_cell_data() const {
+	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
+  Summary: // TODO
+  M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+	return data.custom_cell_data;
 }
 
 void InteractiveGrid3D::set_material_override(const godot::Ref<godot::Material> &p_material) {

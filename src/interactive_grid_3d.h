@@ -19,6 +19,7 @@ Author: Antoine Charruel
 #pragma once
 
 #include "common.h"
+#include "custom_cell_data.h"
 
 // Godot engine
 #include <godot_cpp/classes/a_star2d.hpp>
@@ -95,6 +96,7 @@ private:
 
 	// Grid initialization.
 
+	void _init_cell_flags();
 	void _init_multi_mesh();
 	void _init_astar();
 
@@ -160,6 +162,10 @@ private:
 		godot::Ref<godot::MultiMesh> multimesh;
 		godot::Vector2 cell_size = godot::Vector2(1.0f, 1.0f);
 		std::vector<Cell *> cells;
+
+		//godot::Dictionary custom_cell_flags = godot::Dictionary();
+		godot::Ref<CustomCellData> custom_cell_data;
+
 		godot::Array selected_cells;
 		int hovered_cell_index{ -1 };
 
@@ -248,6 +254,10 @@ public:
 	// Color displayed when hovering over a cell with the mouse
 	void set_hovered_color(const godot::Color &p_color);
 	godot::Color get_hovered_color() const;
+
+	// TODO
+	void set_custom_cell_data(const godot::Ref<CustomCellData> &p_custom_cell_data);
+	godot::Ref<CustomCellData> get_custom_cell_data() const;
 
 	// --- Grid materials
 
