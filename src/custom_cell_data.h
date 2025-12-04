@@ -26,8 +26,8 @@ class CustomCellData : public godot::Resource {
 private:
 	GDCLASS(CustomCellData, Resource);
 
+	godot::String custom_data_name = "";
 	uint32_t flags{ 1 << 0 };
-	godot::String flags_name = "";
 	godot::Color flags_color = godot::Color(1, 1, 1);
 
 protected:
@@ -37,11 +37,11 @@ public:
 	CustomCellData();
 	~CustomCellData();
 
+	void set_custom_data_name(godot::String custom_data_name);
 	void set_flags(uint32_t bitmask);
-	void set_flags_name(godot::String flags_name);
 	void set_flags_color(const godot::Color &p_flags_color);
 
+	godot::String get_custom_data_name() const;
 	uint32_t get_flags() const;
-	godot::String get_flags_name() const;
 	godot::Color get_flags_color() const;
 };

@@ -64,16 +64,17 @@ func _process(delta: float) -> void:
 
 func open_grid():
 	if player_pawn_collision_shape_3d != null:
-
+				_path = []
+				pawn_player.move_player_along_path(_path)
 				# Makes the grid visible.
-				self.set_visible(true)
+				#self.set_visible(true)
 				
 				# Centers the grid.
 				# ! Info: every time center is called, the state of the cells is reset.
-				self.center(player_pawn_collision_shape_3d.global_position)
-				var index_pawn_cell: int = self.get_cell_index_from_global_position(self.get_grid_center_global_position())
-				self.hide_distant_cells(index_pawn_cell, 6)
-				self.compute_unreachable_cells(index_pawn_cell)
+				#self.center(player_pawn_collision_shape_3d.global_position)
+				#var index_pawn_cell: int = self.get_cell_index_from_global_position(self.get_grid_center_global_position())
+				#self.hide_distant_cells(index_pawn_cell, 6)
+				#self.compute_unreachable_cells(index_pawn_cell)
 				
 				_is_grid_open = true
 				try_me.visible = false

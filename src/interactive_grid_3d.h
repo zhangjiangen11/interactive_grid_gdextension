@@ -68,9 +68,12 @@ private:
 		uint16_t index = -1;
 		godot::Transform3D local_xform;
 		godot::Transform3D global_xform;
-		godot::Color color;
-		godot::PackedInt64Array neighbors{};
 		uint32_t flags = 0;
+		godot::Color color;
+		uint32_t custom_flags = 0;
+		godot::Color custom_color;
+		bool has_custom_color{ false };
+		godot::PackedInt64Array neighbors{};
 	} Cell;
 
 	// Grid flags.
@@ -163,7 +166,6 @@ private:
 		godot::Vector2 cell_size = godot::Vector2(1.0f, 1.0f);
 		std::vector<Cell *> cells;
 
-		// godot::Ref<CustomCellData> custom_cell_data;
 		godot::Array custom_cell_data;
 
 		godot::Array selected_cells;
@@ -259,6 +261,11 @@ public:
 	void set_custom_cell_data(const godot::Array &p_custom_cell_data);
 	godot::Array get_custom_cell_data() const;
 
+	void add_custom_data(unsigned int cell_index, godot::String custom_data_name, bool use_custom_color);
+	bool has_custom_data(unsigned int cell_index, godot::String custom_data_name);
+	void clear_custom_data(unsigned int cell_index, godot::String custom_data_name, bool clear_custom_color);
+	void clear_all_custom_data(unsigned int cell_index);
+
 	// --- Grid materials
 
 	void set_material_override(const godot::Ref<godot::Material> &p_material);
@@ -277,6 +284,7 @@ public:
 	godot::Vector3 get_grid_center_global_position() const;
 	godot::Vector3 get_top_left_global_position() const;
 	void center(godot::Vector3 center_position);
+	void refresh();
 
 	// --- Grid visibility
 

@@ -162,6 +162,8 @@ func target_reached()-> void:
 	
 	if self.velocity == Vector3.ZERO:
 		
+		interactive_grid_3d.set_visible(true)
+		
 		# Recenter and reset the grid.
 		interactive_grid_3d.center(self.player_pawn_collision_shape_3d.global_position)
 		
@@ -173,6 +175,15 @@ func target_reached()-> void:
 		
 		interactive_grid_3d.hide_distant_cells(index_pawn_cell, 6)
 		interactive_grid_3d.compute_unreachable_cells(index_pawn_cell)
+
+		var neighbors:PackedInt64Array = interactive_grid_3d.get_neighbors(index_pawn_cell)
+		
+		for n in neighbors:
+			interactive_grid_3d.add_custom_data(n, "CFL_NEIGHBORS", true)
+		
+		interactive_grid_3d.add_custom_data(index_pawn_cell, "CFL_PLAYER", true)
+		
+		interactive_grid_3d.refresh()
 
 		_is_target_reached = true
 	# ----------------------------------------------------------------------------------------F-F*/

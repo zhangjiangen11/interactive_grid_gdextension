@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://causf6bjt06hi"]
+[gd_scene load_steps=11 format=3 uid="uid://causf6bjt06hi"]
 
 [ext_resource type="Shader" uid="uid://c4uypncwhlkik" path="res://data/ressources/Shaders/dynamic_glow.gdshader" id="3_yeeyf"]
 [ext_resource type="PackedScene" uid="uid://cg8gsg3iyhmeu" path="res://data/ui/try_me.tscn" id="4_2qaj2"]
@@ -12,6 +12,14 @@ height = 0.1
 radial_segments = 6
 
 [sub_resource type="CustomCellData" id="CustomCellData_yeeyf"]
+custom_data_name = "CFL_NEIGHBORS"
+flags = 256
+flags_color = Color(0, 1, 0.41960785, 1)
+
+[sub_resource type="CustomCellData" id="CustomCellData_g470t"]
+custom_data_name = "CFL_PLAYER"
+flags = 1024
+flags_color = Color(1, 0, 0.9490196, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_yeeyf"]
 render_priority = 0
@@ -55,7 +63,7 @@ _cell_mesh = SubResource("CylinderMesh_dkjo2")
 "walkable color" = Color(1, 0.76862746, 0.5294118, 1)
 "path color" = Color(1, 0.73086923, 0.9253667, 1)
 "hovered color" = Color(0.40392205, 0.87228805, 0.99999994, 1)
-custom_cell_data = SubResource("CustomCellData_yeeyf")
+custom_cell_data = [SubResource("CustomCellData_yeeyf"), SubResource("CustomCellData_g470t")]
 _material_override = SubResource("ShaderMaterial_yeeyf")
 layout = 1
 movement = 1
