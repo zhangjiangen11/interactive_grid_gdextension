@@ -25,6 +25,7 @@ void InteractiveGrid3D::_create() {
 	if (!(data.flags & GFL_CREATED)) {
 		data.center_global_position = get_global_transform().origin;
 
+		_init_cell_flags();
 		_init_multi_mesh();
 		_init_astar();
 
@@ -62,6 +63,12 @@ void InteractiveGrid3D::_delete() {
 
 		data.flags &= ~GFL_CREATED;
 	}
+}
+
+void InteractiveGrid3D::_init_cell_flags() {
+	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
+  Summary: // TODO
+  M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 }
 
 void InteractiveGrid3D::_init_multi_mesh() {
@@ -407,9 +414,6 @@ void InteractiveGrid3D::_configure_astar_6_dir() {
 		for (int column = 0; column < data.columns; column++) {
 			const int index = row * data.columns + column;
 
-			if (!is_cell_walkable(index))
-				continue;
-
 			const int(*dirs)[2] = (row % 2 == 0) ? even_directions : odd_directions;
 
 			// Iterate over the 6 directions
@@ -420,6 +424,11 @@ void InteractiveGrid3D::_configure_astar_6_dir() {
 				if (nx >= 0 && nx < data.columns && ny >= 0 && ny < data.rows) {
 					int neighbor_index = ny * data.columns + nx;
 
+					data.cells.at(index)->neighbors.push_back(neighbor_index);
+
+					if (!is_cell_walkable(index))
+						continue;
+
 					if (is_cell_walkable(neighbor_index)) {
 						// Add the neighbor if it doesn't already exist
 						if (!data.astar->has_point(neighbor_index)) {
@@ -427,7 +436,6 @@ void InteractiveGrid3D::_configure_astar_6_dir() {
 						}
 
 						data.astar->connect_points(index, neighbor_index);
-						data.cells.at(index)->neighbors.push_back(neighbor_index);
 					}
 				}
 			}
@@ -457,12 +465,12 @@ void InteractiveGrid3D::_configure_astar_8_dir() {
 
 					if (nx >= 0 && nx < data.columns && ny >= 0 && ny < data.rows) {
 						int neighbor_index = ny * data.columns + nx;
+						data.cells.at(index)->neighbors.push_back(neighbor_index);
 
 						// Check if the neighbor is walkable before connecting
 						bool neighbor_walkable = is_cell_walkable(neighbor_index);
 						if (neighbor_walkable) {
 							data.astar->connect_points(index, neighbor_index);
-							data.cells.at(index)->neighbors.push_back(neighbor_index);
 						}
 					}
 				}
@@ -702,9 +710,9 @@ void InteractiveGrid3D::_scan_environnement_obstacles() {
 		   are marked as valid (walkable). Debug logs are generated to 
 		   provide information about the collision results.
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-	if (!is_visible()) {
-		return;
-	}
+	// if (!is_visible()) {
+	// 	return;
+	// }
 
 	if (data.cell_mesh.is_null()) {
 		return;
@@ -806,11 +814,196 @@ void InteractiveGrid3D::_scan_environnement_obstacles() {
 							Prevent cells that are above empty space and touching an obstacle
 							from being displayed
 						*/
-						bool is_in_void = is_cell_in_void(index);
-
-						if (!is_in_void) {
+						//if (!is_cell_in_void(index)) {
 							set_cell_walkable(index, false);
+						//}
+					}
+				}
+			}
+		}
+	}
+
+	auto end = std::chrono::high_resolution_clock::now();
+
+	if (_debug_options.print_execution_time_enabled) {
+		std::chrono::duration<double, std::milli> duration = end - start;
+		PrintLine(__FILE__, __FUNCTION__, __LINE__, "Execution time (ms): ", duration.count());
+	}
+
+	if (_debug_options.print_logs_enabled) {
+		PrintLine(__FILE__, __FUNCTION__, __LINE__, "Scan complete.");
+	}
+}
+
+void InteractiveGrid3D::_scan_environnement_custom_data() { // TODO renommer _scan_environnement
+	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
+  Summary: Scans the game grid to detect obstacles and updates the 
+           corresponding grid cells as walkable or unwalkable. For each 
+		   cell in the grid, a physics query is performed using a box 
+		   shape representing the cell. The query checks for collisions 
+		   with objects on specific layers. Cells with collisions are 
+		   marked as invalid (unwalkable), while cells without collisions 
+		   are marked as valid (walkable). Debug logs are generated to 
+		   provide information about the collision results.
+  M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+	if (!is_visible()) {
+		return;
+	}
+
+	if (data.cell_mesh.is_null()) {
+		return;
+	}
+
+	// Retrieve the physics interface (PhysicsDirectSpaceState3D) of the current
+	// world, which allows performing collision queries
+	godot::PhysicsDirectSpaceState3D *space_state = get_world_3d()->get_direct_space_state();
+
+	if (!space_state) {
+		PrintError(__FILE__, __FUNCTION__, __LINE__, "No PhysicsDirectSpaceState3D available.");
+		return;
+	}
+
+	// Prepare the shape if it has not been created yet
+	if (data.obstacle_shape.is_null()) {
+		data.obstacle_shape = data.cell_mesh->create_convex_shape();
+		godot::Ref<godot::ConvexPolygonShape3D> convex_shape = data.obstacle_shape;
+		godot::PackedVector3Array points = convex_shape->get_points();
+
+		for (int i = 0; i < points.size(); i++) {
+			points[i] *= get_collision_detection_shape_scale();
+		}
+
+		convex_shape->set_points(points);
+		data.obstacle_shape = convex_shape;
+	}
+
+	auto start = std::chrono::high_resolution_clock::now();
+
+	// Iterate through the cells
+	for (int row = 0; row < data.rows; row++) {
+		for (int column = 0; column < data.columns; column++) {
+			// Calculates the cell index
+			const int cell_index = row * data.columns + column;
+
+			if (is_cell_in_void(cell_index)) {
+				continue;
+			}
+
+			godot::TypedArray<godot::Dictionary> results;
+
+			// Retrieves the position of the cell
+			const godot::Vector3 cell_pos = data.cells.at(cell_index)->global_xform.origin;
+
+			// Configure a physics query for collision detection
+			godot::Ref<godot::PhysicsShapeQueryParameters3D> query;
+
+			// Create a new PhysicsShapeQueryParameters3D instance
+			query.instantiate();
+
+			// Assign the shape to be tested (here: the box shape representing a grid cell)
+			query->set_shape(data.obstacle_shape);
+
+			// Place the shape in the world at the current grid cell position (no rotation applied)
+			query->set_transform(godot::Transform3D(godot::Basis(), cell_pos));
+
+			// Define which collision layers will be considered by this query
+			query->set_collision_mask(UINT32_MAX);
+
+			// Enable collision.
+			query->set_collide_with_bodies(true);
+			query->set_collide_with_areas(true);
+
+			// Perform the physics query: check which objects intersect the given
+			// shape. Returns up to 32 results, each stored as a Dictionary
+			results = space_state->intersect_shape(query, 16);
+
+
+			// If there are any results from the collision query
+			if (results.size() > 0) {
+				// Debug log: reports the detected collision along with the cell cell_index
+				// and its grid coordinates
+
+				// TODO debug collision
+				// ** Debug logs
+				// PrintLine(__FILE__, __FUNCTION__, __LINE__,
+				// 		"[GridScan] Collision detected at cell cell_index " +
+				// 				godot::String::num_int64(cell_index) +
+				// 				" (row: " + godot::String::num_int64(i) +
+				// 				", column: " + godot::String::num_int64(j) + ")");
+
+				// Iterate over each collision result returned by the physics query
+				for (int k = 0; k < results.size(); k++) {
+					// Retrieve the k-th result as a Dictionary
+					godot::Dictionary hit = results[k];
+
+					// Extract the 'collider' object from the result
+					godot::Object *collider_obj = hit["collider"];
+
+					// Attempt to cast the collider to a Node, since all objects inherit from Node
+					godot::Node *collider = godot::Object::cast_to<godot::Node>(collider_obj);
+
+					godot::CollisionObject3D *collision_object =
+        			godot::Object::cast_to<godot::CollisionObject3D>(collider_obj);
+
+					if (collider) {
+
+						godot::Ref<CustomCellData> custom_cell_data;
+
+						for (int index = 0; index < data.custom_cell_data.size(); index++) {
+							custom_cell_data = data.custom_cell_data.get(index);
+
+							if (!collision_object) {
+								continue;
+							}
+
+							if (custom_cell_data.is_null()) {
+								continue;
+							}
+
+							uint32_t collision_layer = collision_object->get_collision_layer();
+
+							if (custom_cell_data->get_collision_layer() == 0){
+								continue;
+							}
+
+							if (custom_cell_data->get_layer_mask() == 0){
+								continue;
+							}
+
+							if (!custom_cell_data->has_layers_in_mask(collision_layer)){
+								continue;
+							}
+
+							PrintLine(__FILE__, __FUNCTION__, __LINE__, "name: ", custom_cell_data->get_custom_data_name());
+							
+							data.cells.at(cell_index)->custom_flags |= custom_cell_data->get_layer_mask();
+							data.cells.at(cell_index)->flags |= custom_cell_data->get_layer_mask();
+
+							if(custom_cell_data->get_custom_color_enabled()){
+								data.cells.at(cell_index)->has_custom_color = true;
+								data.cells.at(cell_index)->custom_color = custom_cell_data->get_color();
+								set_cell_color(cell_index, data.cells.at(cell_index)->custom_color);
+							}
 						}
+
+						// TODO debug collision
+						// Log the detected collision, showing the node's name and its
+						// class
+
+						// ** Debug logs.
+						// PrintLine(__FILE__, __FUNCTION__, __LINE__,
+						// 		"[GridScan] Collision -> Node: " + collider->get_name() +
+						// 				" (Class: " + collider->get_class() + ")");
+
+						// Mark the grid cell as invalid (obstructed)
+
+						/*
+							Prevent cells that are above empty space and touching an obstacle
+							from being displayed
+						*/
+
+						// unsigned int obstacles_collision_masks{ 1 << 13 };
+
 					}
 				}
 			}
@@ -849,28 +1042,28 @@ void InteractiveGrid3D::_apply_material(const godot::Ref<godot::Material> &p_mat
 	}
 }
 
-void InteractiveGrid3D::_set_cells_visible(bool visible) {
-	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
-  Summary: Toggles the visual visibility of every cell in the grid.
-  M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
-	int cell_count = data.multimesh->get_instance_count();
+// void InteractiveGrid3D::_set_cells_visible(bool visible) {
+// 	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
+//   Summary: Toggles the visual visibility of every cell in the grid.
+//   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+// 	int cell_count = data.multimesh->get_instance_count();
 
-	// Iterate through the cells
-	for (int row = 0; row < data.rows; row++) {
-		for (int column = 0; column < data.columns; column++) {
-			const int index =
-					row * data.columns + column;
+// 	// Iterate through the cells
+// 	for (int row = 0; row < data.rows; row++) {
+// 		for (int column = 0; column < data.columns; column++) {
+// 			const int index =
+// 					row * data.columns + column;
 
-			if (visible == true) {
-				data.multimesh->set_instance_custom_data(index, data.walkable_color); // Visible
-			} else {
-				data.multimesh->set_instance_custom_data(index, godot::Color(0.0, 0.0, 0.0, 0.0)); // Invisible
-			}
-		}
-	}
+// 			if (visible == true) {
+// 				data.multimesh->set_instance_custom_data(index, data.walkable_color); // Visible
+// 			} else {
+// 				data.multimesh->set_instance_custom_data(index, godot::Color(0.0, 0.0, 0.0, 0.0)); // Invisible
+// 			}
+// 		}
+// 	}
 
-	_apply_material(data.material_override);
-}
+// 	_apply_material(data.material_override);
+// }
 
 void InteractiveGrid3D::_set_cell_in_void(unsigned int cell_index, bool is_in_void) {
 	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
@@ -955,6 +1148,8 @@ void InteractiveGrid3D::_bind_methods() {
 	godot::ClassDB::bind_method(godot::D_METHOD("set_columns"), &InteractiveGrid3D::set_columns);
 	godot::ClassDB::bind_method(godot::D_METHOD("get_columns"), &InteractiveGrid3D::get_columns);
 
+	godot::ClassDB::bind_method(godot::D_METHOD("get_size"), &InteractiveGrid3D::get_size);
+
 	godot::ClassDB::bind_method(godot::D_METHOD("set_cell_size"), &InteractiveGrid3D::set_cell_size);
 	godot::ClassDB::bind_method(godot::D_METHOD("get_cell_size"), &InteractiveGrid3D::get_cell_size);
 
@@ -981,6 +1176,16 @@ void InteractiveGrid3D::_bind_methods() {
 	godot::ClassDB::bind_method(godot::D_METHOD("set_hovered_color"), &InteractiveGrid3D::set_hovered_color);
 	godot::ClassDB::bind_method(godot::D_METHOD("get_hovered_color"), &InteractiveGrid3D::get_hovered_color);
 
+	// Custom cell data.
+
+	godot::ClassDB::bind_method(godot::D_METHOD("set_custom_cells_data"), &InteractiveGrid3D::set_custom_cells_data);
+	godot::ClassDB::bind_method(godot::D_METHOD("get_custom_cells_data"), &InteractiveGrid3D::get_custom_cells_data);
+
+	godot::ClassDB::bind_method(godot::D_METHOD("add_custom_cell_data", "cell_index", "custom_data_name"), &InteractiveGrid3D::add_custom_cell_data);
+	godot::ClassDB::bind_method(godot::D_METHOD("has_custom_cell_data", "cell_index", "custom_data_name"), &InteractiveGrid3D::has_custom_cell_data);
+	godot::ClassDB::bind_method(godot::D_METHOD("clear_custom_cell_data", "cell_index", "custom_data_name", "clear_custom_color"), &InteractiveGrid3D::clear_custom_cell_data);
+	godot::ClassDB::bind_method(godot::D_METHOD("clear_all_custom_cell_data", "cell_index"), &InteractiveGrid3D::clear_all_custom_cell_data);
+
 	// Grid materials.
 
 	godot::ClassDB::bind_method(godot::D_METHOD("get_material_override"), &InteractiveGrid3D::get_material_override);
@@ -997,6 +1202,7 @@ void InteractiveGrid3D::_bind_methods() {
 	// Grid position.
 
 	godot::ClassDB::bind_method(godot::D_METHOD("center", "center_position"), &InteractiveGrid3D::center);
+	godot::ClassDB::bind_method(godot::D_METHOD("update_custom_data"), &InteractiveGrid3D::update_custom_data);
 	godot::ClassDB::bind_method(godot::D_METHOD("get_cell_global_position", "cell_index"), &InteractiveGrid3D::get_cell_global_position);
 	godot::ClassDB::bind_method(godot::D_METHOD("get_cell_index_from_global_position", "global_position"), &InteractiveGrid3D::get_cell_index_from_global_position);
 	godot::ClassDB::bind_method(godot::D_METHOD("get_grid_center_global_position"), &InteractiveGrid3D::get_grid_center_global_position);
@@ -1037,7 +1243,6 @@ void InteractiveGrid3D::_bind_methods() {
 	godot::ClassDB::bind_method(godot::D_METHOD("set_cell_reachable", "cell_index", "set_cell_reachable"), &InteractiveGrid3D::set_cell_reachable);
 
 	// Cell color.
-
 	godot::ClassDB::bind_method(godot::D_METHOD("set_cell_color", "cell_index", "color"), &InteractiveGrid3D::set_cell_color);
 
 	// Masks.
@@ -1074,12 +1279,13 @@ void InteractiveGrid3D::_bind_methods() {
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::COLOR, "selected color"), "set_selected_color", "get_selected_color");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::COLOR, "path color"), "set_path_color", "get_path_color");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::COLOR, "hovered color"), "set_hovered_color", "get_hovered_color");
+	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::ARRAY, "custom_cells_data", godot::PROPERTY_HINT_RESOURCE_TYPE, "CustomCellData"), "set_custom_cells_data", "get_custom_cells_data");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::OBJECT, "_material_override", godot::PROPERTY_HINT_RESOURCE_TYPE, "Material"), "set_material_override", "get_material_override");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::INT, "layout", godot::PROPERTY_HINT_ENUM, "SQUARE, HEXAGONAL"), "set_layout", "get_layout");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::INT, "movement", godot::PROPERTY_HINT_ENUM, "FOUR-DIRECTIONS,SIX-DIRECTIONS,EIGH-DIRECTIONS"), "set_movement", "get_movement");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::VECTOR3, "collision_detection_shape_scale"), "set_collision_detection_shape_scale", "get_collision_detection_shape_scale");
-	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::INT, "obstacles_collision_masks", godot::PROPERTY_HINT_LAYERS_3D_RENDER), "set_obstacles_collision_masks", "get_obstacles_collision_masks");
-	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::INT, "floor_collision_masks", godot::PROPERTY_HINT_LAYERS_3D_RENDER), "set_grid_floor_collision_masks", "get_grid_floor_collision_masks");
+	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::INT, "obstacles_collision_masks", godot::PROPERTY_HINT_LAYERS_3D_PHYSICS), "set_obstacles_collision_masks", "get_obstacles_collision_masks");
+	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::INT, "floor_collision_masks", godot::PROPERTY_HINT_LAYERS_3D_PHYSICS), "set_grid_floor_collision_masks", "get_grid_floor_collision_masks");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::BOOL, "print_logs_enabled"), "set_print_logs_enabled", "is_print_logs_enabled");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::BOOL, "print_execution_time"), "set_print_execution_time_enabled", "is_print_execution_time_enabled");
 }
@@ -1133,7 +1339,7 @@ void InteractiveGrid3D::set_columns(const unsigned int columns) {
 	_delete();
 }
 
-int InteractiveGrid3D::get_columns(void) const {
+int InteractiveGrid3D::get_columns() const {
 	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
   Summary: Returns the columns of rows in the grid.
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
@@ -1156,6 +1362,13 @@ godot::Vector2 InteractiveGrid3D::get_cell_size(void) const {
 		   positioning.
   M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
 	return data.cell_size;
+}
+
+int InteractiveGrid3D::get_size() const {
+	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
+  Summary: // TODO
+  M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+	return data.rows * data.columns;;
 }
 
 void InteractiveGrid3D::set_cell_mesh(const godot::Ref<godot::Mesh> &p_mesh) {
@@ -1304,6 +1517,133 @@ godot::Color InteractiveGrid3D::get_hovered_color() const {
 	return data.hovered_color;
 }
 
+void InteractiveGrid3D::set_custom_cells_data(const godot::Array &p_custom_cell_flag) {
+	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
+  Summary: // TODO
+  M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+	data.custom_cell_data = p_custom_cell_flag;
+}
+
+godot::Array InteractiveGrid3D::get_custom_cells_data() const {
+	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
+  Summary: // TODO
+  M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+	return data.custom_cell_data;
+}
+
+void InteractiveGrid3D::add_custom_cell_data(unsigned int cell_index, godot::String custom_data_name) {
+	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
+  Summary: // TODO
+  M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+
+	if (is_cell_index_out_of_bounds(__FILE__, __FUNCTION__, __LINE__, cell_index)) {
+		return; // !Exit
+	}
+
+	godot::Ref<CustomCellData> custom_cell_data;
+
+	for (int index = 0; index < data.custom_cell_data.size(); index++) {
+		custom_cell_data = data.custom_cell_data.get(index);
+
+		if (custom_cell_data.is_null()) {
+			godot::print_error("custom_cell_data is NULL at index: ", cell_index);
+			continue;
+		}
+
+		if (custom_data_name != custom_cell_data->get_custom_data_name()) {
+			continue;
+		}
+
+		data.cells.at(cell_index)->custom_flags |= custom_cell_data->get_layer_mask();
+		data.cells.at(cell_index)->flags |= custom_cell_data->get_layer_mask();
+
+		if (custom_cell_data->get_custom_color_enabled()) {
+			data.cells.at(cell_index)->has_custom_color = true;
+			data.cells.at(cell_index)->custom_color = custom_cell_data->get_color();
+			set_cell_color(cell_index, data.cells.at(cell_index)->custom_color);
+		} 
+	}
+}
+
+bool InteractiveGrid3D::has_custom_cell_data(unsigned int cell_index, godot::String custom_data_name) {
+	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
+  Summary: // TODO
+  M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+	if (is_cell_index_out_of_bounds(__FILE__, __FUNCTION__, __LINE__, cell_index)) {
+		return false; // !Exit
+	}
+
+	godot::Ref<CustomCellData> custom_cell_data;
+
+	for (int index = 0; index < data.custom_cell_data.size(); index++) {
+		custom_cell_data = data.custom_cell_data.get(index);
+
+		if (custom_cell_data.is_null()) {
+			godot::print_error("custom_cell_data is NULL at index: ", cell_index);
+			continue;
+		}
+
+		if (custom_data_name != custom_cell_data->get_custom_data_name()) {
+			continue;
+		}
+
+		unsigned int cell_flags = data.cells.at(cell_index)->flags;
+		unsigned int custom_cell_data_flags = custom_cell_data->get_layer_mask();
+
+		if ((cell_flags & custom_cell_data_flags) == custom_cell_data_flags) {
+			return true; // !Exit
+		}
+	}
+
+	return false;
+}
+
+void InteractiveGrid3D::clear_custom_cell_data(unsigned int cell_index, godot::String custom_data_name, bool clear_custom_color) {
+	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
+  Summary: // TODO
+  M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+	if (is_cell_index_out_of_bounds(__FILE__, __FUNCTION__, __LINE__, cell_index)) {
+		return; // !Exit
+	}
+
+	godot::Ref<CustomCellData> custom_cell_data;
+
+	for (int index = 0; index < data.custom_cell_data.size(); index++) {
+		custom_cell_data = data.custom_cell_data.get(index);
+
+		if (custom_cell_data.is_null()) {
+			godot::print_error("custom_cell_data is NULL at index: ", cell_index);
+			continue;
+		}
+
+		if (custom_data_name != custom_cell_data->get_custom_data_name()) {
+			continue;
+		}
+
+		if (clear_custom_color) {
+			data.cells.at(cell_index)->has_custom_color = false;
+			set_cell_color(cell_index, data.walkable_color);
+		}
+
+		break;
+	}
+}
+
+void InteractiveGrid3D::clear_all_custom_cell_data(unsigned int cell_index) {
+	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
+  Summary: // TODO
+  M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+	if (is_cell_index_out_of_bounds(__FILE__, __FUNCTION__, __LINE__, cell_index)) {
+		return; // !Exit
+	}
+
+	// Reset.
+	data.cells.at(cell_index)->flags &= ~data.cells.at(cell_index)->custom_flags;
+	data.cells.at(cell_index)->custom_flags = 0;
+	data.cells.at(cell_index)->has_custom_color = false;
+	set_cell_color(cell_index, data.walkable_color); // Reset color
+}
+
 void InteractiveGrid3D::set_material_override(const godot::Ref<godot::Material> &p_material) {
 	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
   Summary: Sets the material override for the grid.
@@ -1395,7 +1735,11 @@ void InteractiveGrid3D::highlight_on_hover(godot::Vector3 global_position) {
 			bool hovered_cell_is_selected = is_cell_selected(data.hovered_cell_index);
 
 			if (!hovered_cell_is_selected) {
-				set_cell_color(data.hovered_cell_index, data.walkable_color);
+				if (data.cells.at(data.hovered_cell_index)->has_custom_color) {
+					set_cell_color(data.hovered_cell_index, data.cells.at(hovered_cell_is_selected)->custom_color);
+				} else {
+					set_cell_color(data.hovered_cell_index, data.walkable_color);
+				}
 			}
 
 			data.hovered_cell_index = -1;
@@ -1418,7 +1762,11 @@ void InteractiveGrid3D::highlight_on_hover(godot::Vector3 global_position) {
 		_set_cell_hovered(data.hovered_cell_index, false);
 
 		if (!old_is_selected) {
-			set_cell_color(data.hovered_cell_index, data.walkable_color);
+			if (data.cells.at(data.hovered_cell_index)->has_custom_color) {
+				set_cell_color(data.hovered_cell_index, data.cells.at(data.hovered_cell_index)->custom_color);
+			} else {
+				set_cell_color(data.hovered_cell_index, data.walkable_color);
+			}
 		}
 
 		data.hovered_cell_index = -1;
@@ -1616,10 +1964,63 @@ void InteractiveGrid3D::center(godot::Vector3 center_position) {
 	_layout(center_position);
 	_align_cells_with_floor();
 	_scan_environnement_obstacles();
+	_scan_environnement_custom_data();
 	_configure_astar();
+
+	// Update mesh instance color alpha
+	for (int cell_index = 0; cell_index < get_size(); cell_index++) {
+		if (data.material_override.is_valid()) {
+			uint32_t cell_flags = data.cells.at(cell_index)->flags;
+			godot::Color current_cell_color = data.cells.at(cell_index)->color;
+			godot::Color new_cell_color{ current_cell_color.r, current_cell_color.g, current_cell_color.b, static_cast<float>(cell_flags) };
+			data.cells.at(cell_index)->color = new_cell_color;
+			data.multimesh->set_instance_custom_data(cell_index, new_cell_color);
+		}
+	}
+
 	set_hover_enabled(true);
 
 	data.flags |= GFL_CENTERED;
+
+	auto end = std::chrono::high_resolution_clock::now();
+
+	if (_debug_options.print_execution_time_enabled) {
+		std::chrono::duration<double, std::milli> duration = end - start;
+		PrintLine(__FILE__, __FUNCTION__, __LINE__, "Execution time (ms): ", duration.count());
+	}
+
+	if (_debug_options.print_logs_enabled) {
+		PrintLine(__FILE__, __FUNCTION__, __LINE__, "Grid centered.");
+	}
+}
+
+void InteractiveGrid3D::update_custom_data() {
+	/*M+M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M+++M
+	Summary: // TODO
+	M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M---M-M*/
+	if (!(data.flags & GFL_CREATED)) {
+		PrintError(__FILE__, __FUNCTION__, __LINE__, "The grid has not been created");
+		return; // !Exit
+	}
+
+	auto start = std::chrono::high_resolution_clock::now();
+
+	set_hover_enabled(false); // Prevent hover during grid refresh
+	_scan_environnement_custom_data();
+	_configure_astar();
+
+	// Update mesh instance color alpha
+	for (int cell_index = 0; cell_index < get_size(); cell_index++) {
+		if (data.material_override.is_valid()) {
+			uint32_t cell_flags = data.cells.at(cell_index)->flags;
+			godot::Color current_cell_color = data.cells.at(cell_index)->color;
+			godot::Color new_cell_color{ current_cell_color.r, current_cell_color.g, current_cell_color.b, static_cast<float>(cell_flags) };
+			data.cells.at(cell_index)->color = new_cell_color;
+			data.multimesh->set_instance_custom_data(cell_index, new_cell_color);
+		}
+	}
+	
+	set_hover_enabled(true);
 
 	auto end = std::chrono::high_resolution_clock::now();
 
@@ -1854,7 +2255,8 @@ void InteractiveGrid3D::InteractiveGrid3D::reset_cells_state() {
 	for (int row = 0; row < data.rows; row++) {
 		for (int column = 0; column < data.columns; column++) {
 			const int index = row * data.columns + column;
-			data.cells.at(index)->flags = 0; // Reset
+			clear_all_custom_cell_data(index);
+			data.cells.at(index)->flags = 0;
 		}
 	}
 

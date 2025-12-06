@@ -10,6 +10,7 @@ const int CFL_HOVERED = 1 << 3;
 const int CFL_SELECTED  = 1 << 4;
 const int CFL_PATH = 1 << 5;
 const int CFL_VISIBLE = 1 << 6;
+const int CFL_PLAYER = 1 << 10;
 
 //uniform float glow_strength : hint_range(0.0, 300.0) = 50.0;
 uniform float glow_strength : hint_range(0.0, 10.0) = 2.0;
@@ -25,7 +26,7 @@ void vertex() {
         instance_c.a = 0.33;
     }
 
-    if ((cell_flag & CFL_WALKABLE) == 0) {
+    if (cell_flag == (1 << 14)) {
         float float_speed = 4.0;
         float color_min = 0.3;
         float color_max = 0.8;
@@ -55,6 +56,10 @@ void vertex() {
     }
 
     if ((cell_flag & CFL_VISIBLE) == 0) instance_c.a = 0.0;
+
+	if ((cell_flag & CFL_PLAYER) != 0) {
+        instance_c.a = 1.0;
+    }
 }
 
 void fragment() {
