@@ -27,8 +27,9 @@ private:
 	GDCLASS(CustomCellData, Resource);
 
 	godot::String custom_data_name = "";
-	uint32_t flags = 1;
+	uint32_t layer_mask = 1;
 	uint32_t collision_layer = 1;
+	bool custom_color_enabled = false;
 	godot::Color color = godot::Color(1, 1, 1);
 
 protected:
@@ -41,12 +42,19 @@ public:
 	void set_custom_data_name(godot::String p_name);
 	godot::String get_custom_data_name() const;
 
-	void set_flags(uint32_t p_mask);
-	uint32_t get_flags() const;
+	void set_layer_mask(const uint32_t p_layer_mask);
+	uint32_t get_layer_mask() const;
 
 	void set_collision_layer(uint32_t p_layer);
 	uint32_t get_collision_layer() const;
 
 	void set_color(const godot::Color &p_color);
 	godot::Color get_color() const;
+
+	void set_custom_color_enabled(bool p_enabled);
+	bool get_custom_color_enabled() const;
+
+	bool has_layers_in_mask(const uint32_t p_layer_mask) const;
+
+	bool get_collision_layer_value(int p_layer_number) const;
 };

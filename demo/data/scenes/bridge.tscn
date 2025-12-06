@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://dbna5exmjhbhp" path="res://data/scenes/pawn_player.tscn" id="1_beigu"]
 [ext_resource type="PackedScene" uid="uid://cg8gsg3iyhmeu" path="res://data/ui/try_me.tscn" id="2_f5mxw"]
-[ext_resource type="Shader" uid="uid://dc4oav4wip1yi" path="res://data/ressources/Shaders/dynamic.gdshader" id="3_t8l2t"]
+[ext_resource type="Shader" uid="uid://dc4oav4wip1yi" path="res://data/ressources/Shaders/custom_data.gdshader" id="3_t8l2t"]
 [ext_resource type="Script" uid="uid://cnxwc4e8vdiox" path="res://data/scripts/interactive_grid_3d.gd" id="4_cfc8r"]
 
 [sub_resource type="Shader" id="Shader_t61oy"]

@@ -109,6 +109,7 @@ private:
 
 	void _align_cells_with_floor();
 	void _scan_environnement_obstacles();
+	void _scan_environnement_custom_data();
 
 	// Grid layout.
 
@@ -218,6 +219,8 @@ public:
 	void set_cell_size(godot::Vector2 cell_size);
 	godot::Vector2 get_cell_size() const;
 
+	int get_size() const;
+	
 	// Mesh used for each cell
 	void set_cell_mesh(const godot::Ref<godot::Mesh> &p_mesh);
 	godot::Ref<godot::Mesh> get_cell_mesh() const;
@@ -260,13 +263,18 @@ public:
 	godot::Color get_hovered_color() const;
 
 	// TODO
-	void set_custom_cell_data(const godot::Array &p_custom_cell_data);
-	godot::Array get_custom_cell_data() const;
+	void set_custom_cells_data(const godot::Array &p_custom_cell_data);
+	godot::Array get_custom_cells_data() const;
 
-	void add_custom_data(unsigned int cell_index, godot::String custom_data_name, bool use_custom_color);
-	bool has_custom_data(unsigned int cell_index, godot::String custom_data_name);
-	void clear_custom_data(unsigned int cell_index, godot::String custom_data_name, bool clear_custom_color);
-	void clear_all_custom_data(unsigned int cell_index);
+	// TODO Rename add_custom_cell_data
+	void add_custom_cell_data(unsigned int cell_index, godot::String custom_data_name);
+	bool has_custom_cell_data(unsigned int cell_index, godot::String custom_data_name);
+	void clear_custom_cell_data(unsigned int cell_index, godot::String custom_data_name, bool clear_custom_color);
+	void clear_all_custom_cell_data(unsigned int cell_index);
+
+	// add_cell_flag // TODO
+	// has_cell_flag // TODO
+	// clear_cell_flag // TODO
 
 	// --- Grid materials
 
@@ -286,7 +294,7 @@ public:
 	godot::Vector3 get_grid_center_global_position() const;
 	godot::Vector3 get_top_left_global_position() const;
 	void center(godot::Vector3 center_position);
-	void refresh();
+	void update_custom_data();
 
 	// --- Grid visibility
 

@@ -26,7 +26,7 @@ void vertex() {
         instance_c.a = 0.33;
     }
 
-    if ((cell_flag & CFL_WALKABLE) == 0) {
+    if (cell_flag == (1 << 14)) {
         float float_speed = 4.0;
         float color_min = 0.3;
         float color_max = 0.8;
@@ -56,7 +56,7 @@ void vertex() {
     }
 
     if ((cell_flag & CFL_VISIBLE) == 0) instance_c.a = 0.0;
-	
+
 	if ((cell_flag & CFL_PLAYER) != 0) {
         instance_c.a = 1.0;
     }
