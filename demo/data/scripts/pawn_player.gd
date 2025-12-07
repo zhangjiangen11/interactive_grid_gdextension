@@ -1,20 +1,31 @@
-# =================================================================================================
-# File: pawn_player.gd
-#
-# Summary: 
-#
-# Node: PlayerPawn (CharacterBody3D).
-#
-# Last modified: November 28, 2025
-#
-# This file is part of the InteractiveGrid GDExtension Source Code.
-# Repository: https://github.com/antoinecharruel/interactive_grid_gdextension
-#
-# Version InteractiveGrid: 1.6.0
-# Version: Godot Engine v4.5.stable.steam - https://godotengine.org
-#
-# Author: Antoine Charruel
-# =================================================================================================
+#**************************************************************************#
+#*  pawn_player.gd                                                        *#
+#**************************************************************************#
+#*                         This file is part of:                          *#
+#*                     INTERACTIVE GRID GDExtension                       *#
+#*         https://github.com/antoinecharruel/interactive_grid            *#
+#**************************************************************************#
+#* Copyright (c) 2025 Antoine Charruel.                                   *#
+#*                                                                        *#
+#* Permission is hereby granted, free of charge, to any person obtaining  *#
+#* a copy of this software and associated documentation files (the        *#
+#* "Software"), to deal in the Software without restriction, including    *#
+#* without limitation the rights to use, copy, modify, merge, publish,    *#
+#* distribute, sublicense, and/or sell copies of the Software, and to     *#
+#* permit persons to whom the Software is furnished to do so, subject to  *#
+#* the following conditions:                                              *#
+#*                                                                        *#
+#* The above copyright notice and this permission notice shall be         *#
+#* included in all copies or substantial portions of the Software.        *#
+#*                                                                        *#
+#* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,        *#
+#* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF     *#
+#* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. *#
+#* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY   *#
+#* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,   *#
+#* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE      *#
+#* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 *#
+#**************************************************************************#
 
 extends CharacterBody3D
 
@@ -24,176 +35,104 @@ extends CharacterBody3D
 @onready var model: Node3D = $model
 @onready var try_me: Control = $"../TryMe"
 
-const _SPEED:float = 5.0
-const _JUMP_VELOCITY:float = 4.5
-const _DISTANCE_THRESHOLD:float = 0.25
-
-var _nb_cell_traveled:int = 0
-var _is_target_reached:bool = false;
-
-# Enumerations containing the diferente states of the player.
-enum _pawn_movements_states{
+enum PawnMovementsStates{
 	IDLE,
 	WALKING,
 	RUN
 }
 
-# Default state for the character is idle.
-var _pawn_curent_movements_states:int = _pawn_movements_states.IDLE
+const SPEED:float = 5.0
+const JUMP_VELOCITY:float = 4.5
+const DISTANCE_THRESHOLD:float = 0.25
+var _movement_state:int = PawnMovementsStates.IDLE
+var _cells_traveled:int = 0
 
 func _ready() -> void:
-	# /*F+F++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	# Summary: Called when the node enters the scene tree for the first time.
-	#
-	# Last Modified: October 04, 2025
 	pass
-	# ----------------------------------------------------------------------------------------F-F*/
 
-func _physics_process(delta: float) -> void:
-	# /*F+F++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	# Summary: Called every frame. 'delta' is the elapsed time since the previous frame.
-	#
-	# Last Modified: October 10, 2025
-	
+func _physics_process(delta: float) -> void:	
 	# Add the gravity.
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 		move_and_slide()
 	
 	if self.velocity == Vector3.ZERO:
-		if _pawn_curent_movements_states != _pawn_movements_states.IDLE:
-			# Reset default state for the character (idle).
-			_pawn_curent_movements_states = _pawn_movements_states.IDLE
+		if _movement_state != PawnMovementsStates.IDLE:
+			_movement_state = PawnMovementsStates.IDLE
 		else:
 			animation_player.play("idle", 0.2)
-	# ----------------------------------------------------------------------------------------F-F*/
 	
-func move_player_to(x:float, z:float)-> void:
-	# /*F+F++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	# Summary: Moves the player toward the specified (x, z) destination. Updates the player's
-	#          velocity and movement state, and handles animations accordingly.
-	#
-	# Last Modified: October 10, 2025
-	
-	# Retrieves the global position of the PawnPlayer.
+func move_player_to(global_position: Vector3)-> void:
 	var pawn_global_position:Vector3 = self.player_pawn_collision_shape_3d.global_position
-	
-	# Calculate the direction towards the destination.
-	var target_global_position: Vector3 = Vector3(x, pawn_global_position.y, z) # Keep the current heightle.
+	var target_global_position: Vector3 = Vector3(global_position.x, pawn_global_position.y, global_position.z)
 	var direction:Vector3 = (target_global_position - pawn_global_position).normalized()
-	
-	# Calculate the distance to travel.
 	var distance_to_target: float = pawn_global_position.distance_to(target_global_position)
 
-	# If the player is very close to the target, stop the movement.
-	if distance_to_target <= 0:
-		if _pawn_curent_movements_states != _pawn_movements_states.IDLE:
-			_pawn_curent_movements_states = _pawn_movements_states.IDLE
+	if distance_to_target <= DISTANCE_THRESHOLD:
+		if _movement_state != PawnMovementsStates.IDLE:
+			_movement_state = PawnMovementsStates.IDLE
 	else:
-		self.velocity = direction * _SPEED # Update the velocity.
+		self.velocity = direction * SPEED
 
-		# Run.
-		if _pawn_curent_movements_states != _pawn_movements_states.RUN:
-			_pawn_curent_movements_states = _pawn_movements_states.RUN
+		if _movement_state != PawnMovementsStates.RUN:
+			_movement_state = PawnMovementsStates.RUN
 		else:
 			animation_player.play("run", 0.2)
 
-		# direction vers la cible
 		var dir = (target_global_position - model.global_position)
-		dir.y = 0  # ignore la hauteur
+		dir.y = 0
 		dir = dir.normalized()
 
 		var target_rot = atan2(-dir.x, -dir.z)
 		model.rotation.y = lerp_angle(model.rotation.y, target_rot, 0.2)
 
 		move_and_slide()
-	# ----------------------------------------------------------------------------------------F-F*/
 	
 func move_player_along_path(path: PackedInt64Array)-> void:
-	# /*F+F++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	# Summary: Moves the player along the specified path. If the player has not yet reached
-	#          the target cell, progresses toward the next cell; otherwise, handles
-	#          the actions for when the target is reached.
-	#
-	# Last Modified: October 10, 2025
-	
-	# Move the Player along the path.
 	if not is_on_target_cell():
-		reaching_cell_target(path) # Reach the target.
-	else:
-		target_reached() # The target has been reached.
-	# ----------------------------------------------------------------------------------------F-F*/
+		move_towards_next_cell(path)
 	
-func reaching_cell_target(path: PackedInt64Array)-> void:
-	# /*F+F++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	# Summary: Moves the player along the given path toward the target cell.
-	#          Updates the number of cells traveled as the player progresses.
-	#
-	# Last Modified: October 21, 2025
-	
-	# Get how many cells have been traveled.
+func move_towards_next_cell(path: PackedInt64Array)-> void:
 	var cells_traveled: int = get_how_many_cells_traveled()
 	
 	if path.size() > 1 and cells_traveled < path.size():
-	
 		var next_cell_index: int = path[cells_traveled+1]
 		var next_cell_global_position: Vector3 = interactive_grid_3d.get_cell_global_position(next_cell_index)
 		
-		# Move the player toward the target cell.
-		move_player_to(next_cell_global_position.x, next_cell_global_position.z)
+		move_player_to(next_cell_global_position)
 
-		if self.global_position.distance_to(next_cell_global_position) <= _DISTANCE_THRESHOLD:
-			set_how_many_cells_traveled(cells_traveled + 1) # Increment the count.
-	
+		if self.global_position.distance_to(next_cell_global_position) <= DISTANCE_THRESHOLD:
+			set_how_many_cells_traveled(cells_traveled + 1)
 	else:
-		target_reached()
-	# ----------------------------------------------------------------------------------------F-F*/
+		target_cell_reached()
 	
-func target_reached()-> void:
-	# /*F+F++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	# Summary: Handles the actions to perform when the player reaches the target.
-	#          Stops the player, resets traveled cells, recenters the grid, and updates
-	#          the grid.
-	#
-	# Last Modified: November 20, 2025
-	
+func target_cell_reached()-> void:
 	self.velocity = Vector3.ZERO
 	set_how_many_cells_traveled(0)
 	
 	if self.velocity == Vector3.ZERO:
 		
 		interactive_grid_3d.set_visible(true)
-		
-		# Recenter and reset the grid.
 		interactive_grid_3d.center(self.player_pawn_collision_shape_3d.global_position)
 		
-		var index_pawn_cell: int = interactive_grid_3d.get_cell_index_from_global_position(self.player_pawn_collision_shape_3d.global_position)
+		var pawn_current_cell_index: int = interactive_grid_3d.get_cell_index_from_global_position(self.player_pawn_collision_shape_3d.global_position)
 
 		# To prevent the player from getting stuck.
-		interactive_grid_3d.set_cell_walkable(index_pawn_cell, true)
-		interactive_grid_3d.set_cell_reachable(index_pawn_cell, true)
+		interactive_grid_3d.set_cell_walkable(pawn_current_cell_index, true)
+		interactive_grid_3d.set_cell_reachable(pawn_current_cell_index, true)
 		
-		interactive_grid_3d.compute_unreachable_cells(index_pawn_cell)
+		interactive_grid_3d.compute_unreachable_cells(pawn_current_cell_index)
 
-		var neighbors:PackedInt64Array = interactive_grid_3d.get_neighbors(index_pawn_cell)
+		var neighbors: PackedInt64Array = interactive_grid_3d.get_neighbors(pawn_current_cell_index)
 		
-		for n in neighbors:
-			interactive_grid_3d.add_custom_cell_data(n, "CFL_NEIGHBORS")
-				
-		interactive_grid_3d.add_custom_cell_data(index_pawn_cell, "CFL_PLAYER")
-		
+		for neighbor_index in neighbors:
+			interactive_grid_3d.add_custom_cell_data(neighbor_index, "CFL_NEIGHBORS")
+	
+		interactive_grid_3d.add_custom_cell_data(pawn_current_cell_index, "CFL_PLAYER")
 		interactive_grid_3d.update_custom_data()
-		interactive_grid_3d.hide_distant_cells(index_pawn_cell, 6)
-			
-		_is_target_reached = true
-	# ----------------------------------------------------------------------------------------F-F*/
+		interactive_grid_3d.hide_distant_cells(pawn_current_cell_index, 6)
 	
 func is_on_target_cell()-> bool:
-	# /*F+F++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	# Summary: Checks if the player is currently on the target cell. 
-	#
-	# Last Modified: October 10, 2025
-	
 	var is_on_target: bool = false
 	var target_cell: Vector3
 	var selected_cells: Array = interactive_grid_3d.get_selected_cells()
@@ -201,26 +140,13 @@ func is_on_target_cell()-> bool:
 	if selected_cells.size() > 0:
 		target_cell = interactive_grid_3d.get_cell_global_position(selected_cells[0])
 	
-	if self.global_position.distance_to(target_cell) <= _DISTANCE_THRESHOLD:
+	if self.global_position.distance_to(target_cell) <= DISTANCE_THRESHOLD:
 		is_on_target = true
 	
 	return is_on_target
-	# ----------------------------------------------------------------------------------------F-F*/
 	
 func get_how_many_cells_traveled()-> int:
-	# /*F+F++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	# Summary: Returns the number of cells the player has traveled.
-	#
-	# Last Modified: October 10, 2025
-	
-	return _nb_cell_traveled
-	# ----------------------------------------------------------------------------------------F-F*/
+	return _cells_traveled
 	
 func set_how_many_cells_traveled(count:int)-> void:
-	# /*F+F++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	# Summary: Updates the number of cells the player has traveled.
-	#
-	# Last Modified: October 10, 2025
-	
-	_nb_cell_traveled = count
-	# ----------------------------------------------------------------------------------------F-F*/
+	_cells_traveled = count

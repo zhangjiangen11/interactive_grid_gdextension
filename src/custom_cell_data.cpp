@@ -99,7 +99,7 @@ void CustomCellData::_bind_methods() {
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::INT, "layer_mask", godot::PROPERTY_HINT_LAYERS_3D_RENDER), "set_layer_mask", "get_layer_mask");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::INT, "collision_layer", godot::PROPERTY_HINT_LAYERS_3D_RENDER), "set_collision_layer", "get_collision_layer");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::BOOL, "use_custom_color"), "set_custom_color_enabled", "get_custom_color_enabled");
-	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::COLOR, "flags_color"), "set_color", "get_color");
+	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::COLOR, "color"), "set_color", "get_color");
 }
 
 CustomCellData::CustomCellData() {}

@@ -154,10 +154,6 @@ directional_shadow_max_distance = 40.0
 [node name="Main" parent="." instance=ExtResource("1_fh8d7")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.0592103, 0.32895422, 9.158834)
 
-[node name="InteractiveGrid3D" parent="Main" index="2"]
-print_logs_enabled = true
-print_execution_time = true
-
 [node name="camp" parent="." instance=ExtResource("2_c8ggi")]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]

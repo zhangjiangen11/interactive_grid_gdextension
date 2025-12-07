@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://causf6bjt06hi"]
+[gd_scene load_steps=12 format=3 uid="uid://causf6bjt06hi"]
 
 [ext_resource type="Shader" uid="uid://dc4oav4wip1yi" path="res://data/ressources/Shaders/custom_data.gdshader" id="3_yeeyf"]
 [ext_resource type="PackedScene" uid="uid://cg8gsg3iyhmeu" path="res://data/ui/try_me.tscn" id="4_2qaj2"]
@@ -16,13 +16,12 @@ custom_data_name = "CFL_PLAYER"
 layer_mask = 128
 collision_layer = 0
 use_custom_color = true
-flags_color = Color(1, 1, 0, 1)
+color = Color(1, 1, 0, 1)
 
 [sub_resource type="CustomCellData" id="CustomCellData_g470t"]
 custom_data_name = "CFL_PULSE"
 layer_mask = 1048832
 collision_layer = 0
-flags_color = Color(1, 0, 1, 0)
 
 [sub_resource type="CustomCellData" id="CustomCellData_yeeyf"]
 custom_data_name = "CFL_NEIGHBORS"
@@ -34,26 +33,18 @@ custom_data_name = "CFL_TRAP"
 layer_mask = 1280
 collision_layer = 536870912
 use_custom_color = true
-flags_color = Color(1, 0.14901961, 0, 1)
+color = Color(1, 0.1764706, 0, 1)
 
 [sub_resource type="CustomCellData" id="CustomCellData_fatw5"]
 custom_data_name = "CFL_ENEMY"
 layer_mask = 2304
 collision_layer = 65536
 use_custom_color = true
-flags_color = Color(1, 0, 0, 1)
+color = Color(1, 0, 0, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_yeeyf"]
 render_priority = 0
 shader = ExtResource("3_yeeyf")
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yeeyf"]
-albedo_color = Color(0, 1, 1, 1)
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_pbhab"]
-material = SubResource("StandardMaterial3D_yeeyf")
-top_radius = 0.05
-bottom_radius = 0.05
 
 [node name="Main" type="Node3D"]
 
@@ -86,10 +77,6 @@ layout = 1
 movement = 1
 collision_detection_shape_scale = Vector3(0.9, 45, 0.9)
 script = ExtResource("4_w868w")
-
-[node name="top_left_debug_mesh" type="CSGMesh3D" parent="InteractiveGrid3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-mesh = SubResource("CylinderMesh_pbhab")
 
 [connection signal="button_down" from="TryMe/Button" to="InteractiveGrid3D" method="_on_button_button_down"]
 
