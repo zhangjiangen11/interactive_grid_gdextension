@@ -71,6 +71,10 @@ void vertex() {
         instance_c.rgb = pulse_color(vec3(instance_c.rgb), 4.0, 0.3, 0.8);
     }
 	
+    if ((cell_flag & CFL_VISIBLE) == 0) {
+        alpha = 0.0; // invisible
+    }
+	
     if ((cell_flag & CFL_REACHABLE) == 0) {
         alpha = 0.0; // invisible
     }

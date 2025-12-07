@@ -556,24 +556,15 @@ void InteractiveGrid3D::_scan_environnement_obstacles() {
 		return;
 	}
 
+	if (!data.cell_shape.is_valid()) {
+		return;
+	}
+
 	godot::PhysicsDirectSpaceState3D *space_state = get_world_3d()->get_direct_space_state();
 
 	if (!space_state) {
 		PrintError(__FILE__, __FUNCTION__, __LINE__, "No PhysicsDirectSpaceState3D available.");
 		return;
-	}
-
-	if (data.obstacle_shape.is_null()) {
-		data.obstacle_shape = data.cell_mesh->create_convex_shape();
-		godot::Ref<godot::ConvexPolygonShape3D> convex_shape = data.obstacle_shape;
-		godot::PackedVector3Array points = convex_shape->get_points();
-
-		for (int i = 0; i < points.size(); i++) {
-			points[i] *= get_collision_detection_shape_scale();
-		}
-
-		convex_shape->set_points(points);
-		data.obstacle_shape = convex_shape;
 	}
 
 	auto start = std::chrono::high_resolution_clock::now();
@@ -585,7 +576,7 @@ void InteractiveGrid3D::_scan_environnement_obstacles() {
 
 			godot::Ref<godot::PhysicsShapeQueryParameters3D> query;
 			query.instantiate();
-			query->set_shape(data.obstacle_shape);
+			query->set_shape(data.cell_shape);
 			query->set_transform(godot::Transform3D(godot::Basis(), cell_pos));
 			query->set_collision_mask(data.obstacles_collision_masks);
 			query->set_collide_with_bodies(true);
@@ -625,24 +616,15 @@ void InteractiveGrid3D::_scan_environnement_custom_data() {
 		return;
 	}
 
+	if (!data.cell_shape.is_valid()) {
+		return;
+	}
+
 	godot::PhysicsDirectSpaceState3D *space_state = get_world_3d()->get_direct_space_state();
 
 	if (!space_state) {
 		PrintError(__FILE__, __FUNCTION__, __LINE__, "No PhysicsDirectSpaceState3D available.");
 		return;
-	}
-
-	if (data.obstacle_shape.is_null()) {
-		data.obstacle_shape = data.cell_mesh->create_convex_shape();
-		godot::Ref<godot::ConvexPolygonShape3D> convex_shape = data.obstacle_shape;
-		godot::PackedVector3Array points = convex_shape->get_points();
-
-		for (int i = 0; i < points.size(); i++) {
-			points[i] *= get_collision_detection_shape_scale();
-		}
-
-		convex_shape->set_points(points);
-		data.obstacle_shape = convex_shape;
 	}
 
 	auto start = std::chrono::high_resolution_clock::now();
@@ -659,7 +641,7 @@ void InteractiveGrid3D::_scan_environnement_custom_data() {
 
 			godot::Ref<godot::PhysicsShapeQueryParameters3D> query;
 			query.instantiate();
-			query->set_shape(data.obstacle_shape);
+			query->set_shape(data.cell_shape);
 			query->set_transform(godot::Transform3D(godot::Basis(), cell_pos));
 			query->set_collision_mask(UINT32_MAX);
 			query->set_collide_with_bodies(true);
@@ -811,8 +793,11 @@ void InteractiveGrid3D::_bind_methods() {
 	godot::ClassDB::bind_method(godot::D_METHOD("set_cell_size"), &InteractiveGrid3D::set_cell_size);
 	godot::ClassDB::bind_method(godot::D_METHOD("get_cell_size"), &InteractiveGrid3D::get_cell_size);
 
-	godot::ClassDB::bind_method(godot::D_METHOD("set_cell_mesh", "_cell_mesh"), &InteractiveGrid3D::set_cell_mesh);
+	godot::ClassDB::bind_method(godot::D_METHOD("set_cell_mesh", "cell_mesh"), &InteractiveGrid3D::set_cell_mesh);
 	godot::ClassDB::bind_method(godot::D_METHOD("get_cell_mesh"), &InteractiveGrid3D::get_cell_mesh);
+
+	godot::ClassDB::bind_method(godot::D_METHOD("set_cell_shape", "cell_shape"), &InteractiveGrid3D::set_cell_shape);
+	godot::ClassDB::bind_method(godot::D_METHOD("get_cell_shape"), &InteractiveGrid3D::get_cell_shape);
 
 	godot::ClassDB::bind_method(godot::D_METHOD("set_walkable_color"), &InteractiveGrid3D::set_walkable_color);
 	godot::ClassDB::bind_method(godot::D_METHOD("get_walkable_color"), &InteractiveGrid3D::get_walkable_color);
@@ -862,9 +847,6 @@ void InteractiveGrid3D::_bind_methods() {
 	godot::ClassDB::bind_method(godot::D_METHOD("set_movement", "movement"), &InteractiveGrid3D::set_movement);
 	godot::ClassDB::bind_method(godot::D_METHOD("get_movement"), &InteractiveGrid3D::get_movement);
 
-	godot::ClassDB::bind_method(godot::D_METHOD("set_collision_detection_shape_scale", "scale"), &InteractiveGrid3D::set_collision_detection_shape_scale);
-	godot::ClassDB::bind_method(godot::D_METHOD("get_collision_detection_shape_scale"), &InteractiveGrid3D::get_collision_detection_shape_scale);
-
 	godot::ClassDB::bind_method(godot::D_METHOD("compute_unreachable_cells", "start_cell_index"), &InteractiveGrid3D::compute_unreachable_cells);
 	godot::ClassDB::bind_method(godot::D_METHOD("hide_distant_cells", "start_cell_index", "distance"), &InteractiveGrid3D::hide_distant_cells);
 
@@ -903,7 +885,8 @@ void InteractiveGrid3D::_bind_methods() {
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::INT, "_rows"), "set_rows", "get_rows");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::INT, "_columns"), "set_columns", "get_columns");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::VECTOR2, "cell_size"), "set_cell_size", "get_cell_size");
-	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::OBJECT, "_cell_mesh", godot::PROPERTY_HINT_RESOURCE_TYPE, "Mesh"), "set_cell_mesh", "get_cell_mesh");
+	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::OBJECT, "cell_mesh", godot::PROPERTY_HINT_RESOURCE_TYPE, "Mesh"), "set_cell_mesh", "get_cell_mesh");
+	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::OBJECT, "cell_shape", godot::PROPERTY_HINT_RESOURCE_TYPE, "Shape3D"), "set_cell_shape", "get_cell_shape");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::COLOR, "walkable color"), "set_walkable_color", "get_walkable_color");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::COLOR, "unwalkable color"), "set_unwalkable_color", "get_unwalkable_color");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::COLOR, "unreachable color"), "set_unreachable_color", "get_unreachable_color");
@@ -911,7 +894,7 @@ void InteractiveGrid3D::_bind_methods() {
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::COLOR, "path color"), "set_path_color", "get_path_color");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::COLOR, "hovered color"), "set_hovered_color", "get_hovered_color");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::ARRAY, "custom_cells_data", godot::PROPERTY_HINT_RESOURCE_TYPE, "CustomCellData"), "set_custom_cells_data", "get_custom_cells_data");
-	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::OBJECT, "_material_override", godot::PROPERTY_HINT_RESOURCE_TYPE, "Material"), "set_material_override", "get_material_override");
+	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::OBJECT, "material_override", godot::PROPERTY_HINT_RESOURCE_TYPE, "Material"), "set_material_override", "get_material_override");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::INT, "layout", godot::PROPERTY_HINT_ENUM, "SQUARE, HEXAGONAL"), "set_layout", "get_layout");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::INT, "movement", godot::PROPERTY_HINT_ENUM, "FOUR-DIRECTIONS,SIX-DIRECTIONS,EIGH-DIRECTIONS"), "set_movement", "get_movement");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::VECTOR3, "collision_detection_shape_scale"), "set_collision_detection_shape_scale", "get_collision_detection_shape_scale");
@@ -974,12 +957,30 @@ int InteractiveGrid3D::get_size() const {
 }
 
 void InteractiveGrid3D::set_cell_mesh(const godot::Ref<godot::Mesh> &p_mesh) {
+	if (p_mesh == data.cell_mesh) {
+		return;
+	}
+
 	data.cell_mesh = p_mesh;
 	_delete();
 }
 
 godot::Ref<godot::Mesh> InteractiveGrid3D::get_cell_mesh() const {
 	return data.cell_mesh;
+}
+
+void InteractiveGrid3D::set_cell_shape(const godot::Ref<godot::Shape3D> &p_shape) {
+	if (p_shape == data.cell_shape) {
+		return;
+	}
+
+	data.cell_shape = p_shape;
+	_delete();
+	
+}
+
+godot::Ref<godot::Shape3D> InteractiveGrid3D::get_cell_shape() const {
+	return data.cell_shape;
 }
 
 void InteractiveGrid3D::set_layout(Layout p_layout) {
@@ -997,15 +998,6 @@ void InteractiveGrid3D::set_movement(Movement p_movement) {
 
 InteractiveGrid3D::Movement InteractiveGrid3D::get_movement() const {
 	return data.movement;
-}
-
-void InteractiveGrid3D::set_collision_detection_shape_scale(godot::Vector3 p_scale) {
-	data.collision_detection_shape_scale = p_scale;
-	_delete();
-}
-
-godot::Vector3 InteractiveGrid3D::get_collision_detection_shape_scale() const {
-	return data.collision_detection_shape_scale;
 }
 
 void InteractiveGrid3D::set_walkable_color(const godot::Color &p_color) {

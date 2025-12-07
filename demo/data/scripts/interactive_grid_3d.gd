@@ -49,17 +49,18 @@ func _process(delta: float) -> void:
 	else:
 		var selected_cells: Array = self.get_selected_cells()
 		var pawn_current_cell_index: int = self.get_cell_index_from_global_position(self.player_pawn_collision_shape_3d.global_position)
-	
 		_path = self.get_path(pawn_current_cell_index, selected_cells[0])
 		
+	if not _path.is_empty():
 		pawn_player.move_player_along_path(_path)
 
+			
 func open_grid() -> void:
 	if player_pawn_collision_shape_3d != null:
-				pawn_player.move_player_along_path(_path)
-				
-				_is_grid_open = true
-				try_me.visible = false
+		pawn_player.move_player_along_path(_path)
+		
+		_is_grid_open = true
+		try_me.visible = false
 
 func _input(event) -> void:
 	if event.is_action_pressed("open_grid") and not _is_grid_open:
@@ -74,27 +75,28 @@ func _input(event) -> void:
 		if ray_pos == null:
 			return
 			
-		var selected_cells: Array = self.get_selected_cells()
+		var selected_cells: Array = get_selected_cells()
 		
-		if selected_cells.size() < 1:
+		if selected_cells.is_empty():
 			# Retrieve the selected cells.
 			var selected_cell: int = get_cell_index_from_global_position(ray_cast_from_mouse.get_ray_intersection_position())
-			self.select_cell(selected_cell)
+			var center_cell_index: int = get_cell_index_from_global_position(get_grid_center_global_position())
 			
-			# Select a cell.
-			if self.get_selected_cells().is_empty():
-				return
+			if selected_cell != center_cell_index:
+				select_cell(selected_cell)
 			
-			var pawn_current_cell_index: int = self.get_cell_index_from_global_position(self.get_grid_center_global_position())
-			self.set_cell_walkable(pawn_current_cell_index, true)
-			
-			# Retrieve the path.
-			_path = self.get_path(pawn_current_cell_index, selected_cells[0]) # only the first one.
-			print("Last selected cell:", self.get_latest_selected())
-			print("Path:", _path)
+			if not get_selected_cells().is_empty():
+				var pawn_current_cell_index: int = self.get_cell_index_from_global_position(self.get_grid_center_global_position())
+				self.set_cell_walkable(pawn_current_cell_index, true)
+				
+				# Retrieve the path.
+				_path = self.get_path(pawn_current_cell_index, selected_cells[0]) # only the first one.
+				print("Last selected cell:", self.get_latest_selected())
+				print("Path:", _path)
 
-			# Highlight the path.
-			self.highlight_path(_path)
+				# Highlight the path.
+				if _path.size() > 1:
+					self.highlight_path(_path)
 
 func _on_button_button_down() -> void:
 	open_grid()

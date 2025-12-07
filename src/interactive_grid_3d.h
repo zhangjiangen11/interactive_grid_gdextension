@@ -104,6 +104,7 @@ private:
 		uint32_t floor_collision_mask = 1 << 14;
 
 		godot::Ref<godot::Mesh> cell_mesh;
+		godot::Ref<godot::Shape3D> cell_shape;
 		godot::MultiMeshInstance3D *multimesh_instance;
 		godot::Ref<godot::MultiMesh> multimesh;
 		godot::Vector2 cell_size = godot::Vector2(1.0f, 1.0f);
@@ -122,10 +123,7 @@ private:
 		godot::Color hovered_color{ godot::Color(1.0, 0.84313726, 0, 1.0) };
 
 		godot::Ref<godot::Material> material_override;
-
-		godot::Ref<godot::ConvexPolygonShape3D> obstacle_shape;
-		godot::Vector3 collision_detection_shape_scale = godot::Vector3(1.0f, 1.0f, 1.0f);
-
+		
 	} data;
 
 	static constexpr int GFL_CREATED = 1 << 0;
@@ -190,14 +188,14 @@ public:
 	void set_cell_mesh(const godot::Ref<godot::Mesh> &p_mesh);
 	godot::Ref<godot::Mesh> get_cell_mesh() const;
 
+	void set_cell_shape(const godot::Ref<godot::Shape3D> &p_shape);
+	godot::Ref<godot::Shape3D> get_cell_shape() const;
+
 	void set_layout(Layout p_layout);
 	Layout get_layout() const;
 
 	void set_movement(Movement p_movement);
 	Movement get_movement() const;
-
-	void set_collision_detection_shape_scale(godot::Vector3 p_scale);
-	godot::Vector3 get_collision_detection_shape_scale() const;
 
 	void set_walkable_color(const godot::Color &p_color);
 	godot::Color get_walkable_color() const;

@@ -111,7 +111,6 @@ func target_cell_reached()-> void:
 	set_how_many_cells_traveled(0)
 	
 	if self.velocity == Vector3.ZERO:
-		
 		interactive_grid_3d.set_visible(true)
 		interactive_grid_3d.center(self.player_pawn_collision_shape_3d.global_position)
 		
@@ -120,7 +119,7 @@ func target_cell_reached()-> void:
 		# To prevent the player from getting stuck.
 		interactive_grid_3d.set_cell_walkable(pawn_current_cell_index, true)
 		interactive_grid_3d.set_cell_reachable(pawn_current_cell_index, true)
-		
+		interactive_grid_3d.hide_distant_cells(pawn_current_cell_index, 6)
 		interactive_grid_3d.compute_unreachable_cells(pawn_current_cell_index)
 
 		var neighbors: PackedInt64Array = interactive_grid_3d.get_neighbors(pawn_current_cell_index)
@@ -130,7 +129,6 @@ func target_cell_reached()-> void:
 	
 		interactive_grid_3d.add_custom_cell_data(pawn_current_cell_index, "CFL_PLAYER")
 		interactive_grid_3d.update_custom_data()
-		interactive_grid_3d.hide_distant_cells(pawn_current_cell_index, 6)
 	
 func is_on_target_cell()-> bool:
 	var is_on_target: bool = false
