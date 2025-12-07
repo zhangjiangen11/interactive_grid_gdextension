@@ -37,10 +37,6 @@
 #include <strings.h> // POSIX systems
 #endif
 
-#include <array>
-#include <sstream>
-#include <vector>
-
 #include <godot_cpp/core/binder_common.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 
@@ -51,7 +47,7 @@ inline void PrintError(const godot::String &p_file, const godot::String &p_func,
 
 template <typename... Args>
 void PrintError(const godot::String &p_file, const godot::String &p_func, const int &p_line, const godot::Variant &p_variant, Args... p_args) {
-	godot::String line_str = godot::String("[") + file + "@" + func + ":" + godot::itos(p_line) + "] " + godot::String(p_variant);
+	godot::String line_str = godot::String("[") + p_file + "@" + p_func + ":" + godot::itos(p_line) + "] " + godot::String(p_variant);
 	godot::UtilityFunctions::printerr(line_str, p_args...);
 }
 

@@ -107,7 +107,7 @@ private:
 		godot::MultiMeshInstance3D *multimesh_instance;
 		godot::Ref<godot::MultiMesh> multimesh;
 		godot::Vector2 cell_size = godot::Vector2(1.0f, 1.0f);
-		std::vector<Cell *> cells;
+		godot::Vector<Cell *> cells;
 
 		godot::Array custom_cell_data;
 
