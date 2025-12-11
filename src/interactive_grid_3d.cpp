@@ -143,19 +143,20 @@ void InteractiveGrid3D::_layout(godot::Vector3 p_center_position) {
 void InteractiveGrid3D::_layout_cells_as_square_grid(godot::Vector3 p_center_position) {
 	data.center_global_position = p_center_position;
 
-	const float center_to_grid_edge_x = (data.columns / 2) * data.cell_size.x;
-	const float center_to_grid_edge_z = (data.rows / 2) * data.cell_size.y;
+	const float center_to_edge_x = (data.columns / 2) * data.cell_size.x;
+	const float center_to_edge_z = (data.rows / 2) * data.cell_size.y;
 
-	data.top_left_global_position.x = p_center_position.x - center_to_grid_edge_x;
-	data.top_left_global_position.z = p_center_position.z - center_to_grid_edge_z;
+	godot::Vector3 top_left_global_position;
+	top_left_global_position.x = p_center_position.x - center_to_edge_x;
+	top_left_global_position.z = p_center_position.z - center_to_edge_z;
 
 	for (int row = 0; row < data.rows; row++) {
 		for (int column = 0; column < data.columns; column++) {
 			const int index = row * data.columns + column;
 
-			float cell_pos_x = data.top_left_global_position.x + column * data.cell_size.x;
+			float cell_pos_x = top_left_global_position.x + column * data.cell_size.x;
 			float cell_pos_y = p_center_position.y;
-			float cell_pos_z = data.top_left_global_position.z + row * data.cell_size.y;
+			float cell_pos_z = top_left_global_position.z + row * data.cell_size.y;
 			godot::Vector3 cell_pos(cell_pos_x, cell_pos_y, cell_pos_z);
 
 			godot::Transform3D global_xform = data.multimesh_instance->get_global_transform();
@@ -183,30 +184,25 @@ void InteractiveGrid3D::_layout_cells_as_square_grid(godot::Vector3 p_center_pos
 void InteractiveGrid3D::_layout_cells_as_hexagonal_grid(godot::Vector3 p_center_position) {
 	data.center_global_position = p_center_position;
 
-	// The short diagonal (s) can be calculated using the formula: s = a · √3.
-	const float hex_short_diagonal = data.cell_size.x; // s
-
-	// a = s / √3.
-	const float hex_side_length = hex_short_diagonal / sqrt(3); // a
-
-	// r = a · √3 / 2.
-	const float hex_inradius = hex_side_length * sqrt(3) / 2;
-
+	const float hex_short_diagonal = data.cell_size.x; // s = a · √3
+	const float hex_side_length = hex_short_diagonal / sqrt(3); // a = s / √3.
 	const float hex_side_to_side = data.cell_size.x / 2;
+	const float hex_inradius = hex_side_length * sqrt(3) / 2; // r = a · √3 / 2.
 
-	float center_to_grid_edge_x = (data.columns / 2) * data.cell_size.x;
-	float center_to_grid_edge_z = (data.rows / 2) * data.cell_size.y;
+	float center_to_edge_x = (data.columns / 2) * data.cell_size.x;
+	float center_to_edge_z = (data.rows / 2) * data.cell_size.y;
+
+	if ((data.columns % 2)) {
+		center_to_edge_x;
+	}
 
 	if (!(data.rows % 2)) {
-		center_to_grid_edge_z -= hex_side_length;
+		center_to_edge_z -= hex_side_length;
 	}
 
-	if (!(data.columns % 2)) {
-		center_to_grid_edge_x -= hex_side_to_side;
-	}
-
-	data.top_left_global_position.x = p_center_position.x - center_to_grid_edge_x - hex_inradius;
-	data.top_left_global_position.z = p_center_position.z - center_to_grid_edge_z - hex_side_length;
+	godot::Vector3 top_left_global_position;
+	top_left_global_position.x = p_center_position.x - center_to_edge_x;
+	top_left_global_position.z = p_center_position.z - center_to_edge_z;
 
 	for (int row = 0; row < data.rows; row++) {
 		for (int column = 0; column < data.columns; column++) {
@@ -217,13 +213,13 @@ void InteractiveGrid3D::_layout_cells_as_hexagonal_grid(godot::Vector3 p_center_
 			bool is_even_row = (row % 2) == 0;
 
 			if (is_even_row) {
-				cell_pos_x = data.top_left_global_position.x + (column * data.cell_size.x);
+				cell_pos_x = top_left_global_position.x + (column * data.cell_size.x);
 			} else {
-				cell_pos_x = data.top_left_global_position.x + (column * data.cell_size.x) + (hex_side_to_side);
+				cell_pos_x = top_left_global_position.x + (column * data.cell_size.x) + hex_side_to_side;
 			}
 
 			float cell_pos_y = p_center_position.y;
-			float cell_pos_z = data.top_left_global_position.z + (row * data.cell_size.y) + hex_side_length;
+			float cell_pos_z = top_left_global_position.z + (row * data.cell_size.y);
 			godot::Vector3 cell_pos(cell_pos_x, cell_pos_y, cell_pos_z);
 
 			godot::Transform3D global_xform = data.multimesh_instance->get_global_transform();
@@ -237,7 +233,7 @@ void InteractiveGrid3D::_layout_cells_as_hexagonal_grid(godot::Vector3 p_center_
 			data.multimesh->set_instance_transform(index, xform);
 
 			data.cells.write[index]->local_xform = data.multimesh->get_instance_transform(index);
-			data.cells.write[index]->global_xform  = data.multimesh_instance->get_global_transform() * data.multimesh->get_instance_transform(index);
+			data.cells.write[index]->global_xform = data.multimesh_instance->get_global_transform() * data.multimesh->get_instance_transform(index);
 
 			set_cell_visible(index, false);
 		}
@@ -689,7 +685,6 @@ void InteractiveGrid3D::_scan_environnement_custom_data() {
 							data.cells.write[cell_index]->flags |= custom_cell_data->get_layer_mask();
 
 							if (custom_cell_data->get_custom_color_enabled()) {
-
 								data.cells.write[cell_index]->has_custom_color = true;
 								data.cells.write[cell_index]->custom_color = custom_cell_data->get_color();
 
@@ -976,7 +971,6 @@ void InteractiveGrid3D::set_cell_shape(const godot::Ref<godot::Shape3D> &p_shape
 
 	data.cell_shape = p_shape;
 	_delete();
-	
 }
 
 godot::Ref<godot::Shape3D> InteractiveGrid3D::get_cell_shape() const {
@@ -1081,7 +1075,6 @@ void InteractiveGrid3D::add_custom_cell_data(int p_cell_index, godot::String p_c
 		data.cells.write[p_cell_index]->flags |= custom_cell_data->get_layer_mask();
 
 		if (custom_cell_data->get_custom_color_enabled()) {
-
 			data.cells.write[p_cell_index]->has_custom_color = true;
 			data.cells.write[p_cell_index]->custom_color = custom_cell_data->get_color();
 			set_cell_color(p_cell_index, data.cells[p_cell_index]->custom_color);
@@ -1308,30 +1301,21 @@ int InteractiveGrid3D::get_cell_index_from_global_position(godot::Vector3 p_glob
 			break;
 		case Layout::LAYOUT_HEXAGONAL:
 
-			// The short diagonal (s) can be calculated using the formula: s = a · √3.
-			const float hex_short_diagonal = data.cell_size.x; // s
-
-			// a = s / √3.
-			const float hex_side_length = hex_short_diagonal / sqrt(3); // a
-
-			// The radius of the circumference that contains all vertices of a hexagon (R = a).
-			const float hex_circumradius = hex_side_length * 2;
-
+			const float hex_short_diagonal = data.cell_size.x; // s = a · √3
+			const float hex_side_length = hex_short_diagonal / sqrt(3); // a = s / √3.
 			const float hex_side_to_side = data.cell_size.x / 2;
+			const float hex_inradius = hex_side_length * sqrt(3) / 2; // r = a · √3 / 2.
 
 			float center_to_edge_x = (data.columns / 2) * data.cell_size.x;
 			float center_to_edge_z = (data.rows / 2) * data.cell_size.y;
 
+			if ((data.rows % 2)) {
+				center_to_edge_z += hex_side_length;
+				;
+			}
+
 			top_left_global_position.x = data.center_global_position.x - center_to_edge_x;
 			top_left_global_position.z = data.center_global_position.z - center_to_edge_z;
-
-			if (is_even_row) {
-				center_to_edge_z -= hex_side_length;
-			}
-
-			if (is_even_column) {
-				center_to_edge_x -= hex_side_to_side;
-			}
 
 			if (p_global_position.x < (top_left_global_position.x - hex_side_to_side)) {
 				return -1;
@@ -1345,14 +1329,8 @@ int InteractiveGrid3D::get_cell_index_from_global_position(godot::Vector3 p_glob
 				return -1;
 			}
 
-			if (is_even_row) {
-				if (p_global_position.z > (top_left_global_position.z + center_to_edge_z * 2 + hex_circumradius + hex_side_length / 2)) {
-					return -1;
-				}
-			} else {
-				if (p_global_position.z > (top_left_global_position.z + center_to_edge_z * 2 + hex_circumradius)) {
-					return -1;
-				}
+			if (p_global_position.z > (top_left_global_position.z + center_to_edge_z * 2)) {
+				return -1;
 			}
 	}
 

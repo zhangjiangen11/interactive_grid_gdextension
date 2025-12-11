@@ -54,7 +54,7 @@ shader = ExtResource("3_yeeyf")
 [node name="PawnPlayer" parent="." instance=ExtResource("5_dxyxo")]
 
 [node name="Camera3D_Iso" parent="PawnPlayer" index="1"]
-transform = Transform3D(0.7071067, -0.4999999, 0.4999999, 0, 0.7071067, 0.7071067, -0.7071067, -0.4999999, 0.4999999, 6, 10, 6)
+transform = Transform3D(0.7071067, -0.4999999, 0.49999994, 0, 0.70710677, 0.7071067, -0.7071067, -0.4999999, 0.49999994, 9, 15, 9)
 current = true
 size = 12.0
 
@@ -68,8 +68,8 @@ collision_mask = 0
 text = "(Press SPACE)"
 
 [node name="InteractiveGrid3D" type="InteractiveGrid3D" parent="."]
-_rows = 11
-_columns = 11
+_rows = 13
+_columns = 13
 cell_size = Vector2(1.5, 1.29)
 cell_mesh = SubResource("CylinderMesh_dkjo2")
 cell_shape = SubResource("CylinderShape3D_yeeyf")

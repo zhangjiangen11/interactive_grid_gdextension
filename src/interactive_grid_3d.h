@@ -123,7 +123,7 @@ private:
 		godot::Color hovered_color{ godot::Color(1.0, 0.84313726, 0, 1.0) };
 
 		godot::Ref<godot::Material> material_override;
-		
+
 	} data;
 
 	static constexpr int GFL_CREATED = 1 << 0;

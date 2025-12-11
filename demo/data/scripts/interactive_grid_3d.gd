@@ -63,14 +63,14 @@ func show_grid():
 	_path = []
 	self.set_visible(true)
 	self.center(_pawn.global_position)
-
+	
 	var pawn_current_cell_index: int = self.get_cell_index_from_global_position(_pawn.global_position)
 
 	# To prevent the player from getting stuck.
 	self.set_cell_walkable(pawn_current_cell_index, true)
 	self.set_cell_reachable(pawn_current_cell_index, true)
 
-	#self.hide_distant_cells(pawn_current_cell_index, 6)
+	self.hide_distant_cells(pawn_current_cell_index, 6)
 	self.compute_unreachable_cells(pawn_current_cell_index)
 
 	var neighbors: PackedInt64Array = self.get_neighbors(pawn_current_cell_index)
