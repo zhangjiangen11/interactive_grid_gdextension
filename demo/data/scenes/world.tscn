@@ -151,9 +151,6 @@ shadow_enabled = true
 directional_shadow_blend_splits = true
 directional_shadow_max_distance = 40.0
 
-[node name="Main" parent="." instance=ExtResource("1_fh8d7")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.0592103, 0.32895422, 9.158834)
-
 [node name="camp" parent="." instance=ExtResource("2_c8ggi")]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
@@ -188,6 +185,4 @@ collision_layer = 65536
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Enemy/StaticBody3D"]
 shape = SubResource("ConcavePolygonShape3D_t61oy")
 
-[editable path="Main"]
-[editable path="Main/PawnPlayer"]
-[editable path="Main/TryMe"]
+[node name="Main" parent="." instance=ExtResource("1_fh8d7")]

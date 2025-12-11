@@ -29,76 +29,118 @@
 
 extends InteractiveGrid3D
 
-@onready var pawn_player: CharacterBody3D = $"../PawnPlayer"
-@onready var player_pawn_collision_shape_3d: CollisionShape3D = $"../PawnPlayer/PlayerPawnCollisionShape3D"
 @onready var ray_cast_from_mouse: RayCast3D = $"../PawnPlayer/RayCastFromMouse"
-@onready var try_me: Control = $"../TryMe"
 
-var _is_grid_open: bool = false
 var _path: PackedInt64Array = []
+var _pawn: CharacterBody3D = null
+
 
 func _ready() -> void:
 	pass
 
+
 func _process(delta: float) -> void:
-	if pawn_player == null: return
+	if _pawn == null: return
 	
-	# Highlight the cell under the mouse.
 	if self.get_selected_cells().is_empty():
-		_path = []
 		self.highlight_on_hover(ray_cast_from_mouse.get_ray_intersection_position())
 	else:
-		var selected_cells: Array = self.get_selected_cells()
-		var pawn_current_cell_index: int = self.get_cell_index_from_global_position(self.player_pawn_collision_shape_3d.global_position)
-		_path = self.get_path(pawn_current_cell_index, selected_cells[0])
-		
-	if not _path.is_empty():
-		print("move")
-		pawn_player.move_player_along_path(_path)
+		move_along_path(_path)
 
-			
-func open_grid() -> void:
-	if player_pawn_collision_shape_3d != null:
-		pawn_player.move_player_along_path(_path)
-		
-		_is_grid_open = true
-		try_me.visible = false
 
-func _input(event) -> void:
-	if event.is_action_pressed("open_grid") and not _is_grid_open:
-		#  SPACE BAR: Open the grid.
-		open_grid()
+func show_grid():
+	#region InteractiveGrid3D Center
+	## Here, the grid is centered around the player.
+	## !Note: This operation repositions all cells, aligns them with the environment,
+	## rescans obstacles and custom data, and refreshes A* navigation.
+	##  - Manual modifications can also be applied here, such as:
+	##     - Hiding cells beyond a certain distance
+	##     - compute_unreachable_cells
+	##     - Adding custom data
 
+	if _pawn == null: return
+
+	_path = []
+	self.set_visible(true)
+	self.center(_pawn.global_position)
+
+	var pawn_current_cell_index: int = self.get_cell_index_from_global_position(_pawn.global_position)
+
+	# To prevent the player from getting stuck.
+	self.set_cell_walkable(pawn_current_cell_index, true)
+	self.set_cell_reachable(pawn_current_cell_index, true)
+
+	#self.hide_distant_cells(pawn_current_cell_index, 6)
+	self.compute_unreachable_cells(pawn_current_cell_index)
+
+	var neighbors: PackedInt64Array = self.get_neighbors(pawn_current_cell_index)
+	for neighbor_index in neighbors:
+		self.add_custom_cell_data(neighbor_index, "CFL_NEIGHBORS")
+
+	self.add_custom_cell_data(pawn_current_cell_index, "CFL_PLAYER")
+	
+	## !Note: Don't forget to call update_custom_data().
+	## It refreshes custom_cell_flags, colors, and the A* configuration
+	## based on the newly updated CellCustomData.
+	self.update_custom_data()
+	#endregion
+
+func _input(event):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
-		if pawn_player == null:
+		if _pawn == null: 
 			return
-			
+
 		var ray_pos: Vector3 = ray_cast_from_mouse.get_ray_intersection_position()
-		if ray_pos == null:
+		if ray_pos == null: 
 			return
-			
-		var selected_cells: Array = get_selected_cells()
-		
-		if selected_cells.is_empty():
-			# Retrieve the selected cells.
-			var selected_cell: int = get_cell_index_from_global_position(ray_cast_from_mouse.get_ray_intersection_position())
-			var center_cell_index: int = get_cell_index_from_global_position(get_grid_center_global_position())
-			
-			if selected_cell != center_cell_index:
-				select_cell(selected_cell)
-			
-			if not get_selected_cells().is_empty():
-				var pawn_current_cell_index: int = self.get_cell_index_from_global_position(self.get_grid_center_global_position())
-				self.set_cell_walkable(pawn_current_cell_index, true)
-				
-				# Retrieve the path.
-				_path = self.get_path(pawn_current_cell_index, selected_cells[0]) # only the first one.
-				print("Last selected cell:", self.get_latest_selected())
-				print("Path:", _path)
 
-				# Highlight the path.
-				if _path.size() > 1:
-					self.highlight_path(_path)
+		var selected_cells: Array = self.get_selected_cells()
+		if selected_cells.size() < 1:
+			var hit_cell_index = self.get_cell_index_from_global_position(ray_pos)
+			self.select_cell(hit_cell_index)
+			selected_cells = self.get_selected_cells()
+			if selected_cells.is_empty():
+				return
 
-func _on_button_button_down() -> void:
-	open_grid()
+			var pawn_current_cell_index: int = self.get_cell_index_from_global_position(self.get_grid_center_global_position())
+			self.set_cell_walkable(pawn_current_cell_index, true)
+			_path = self.get_path(pawn_current_cell_index, selected_cells[0])
+			print("Last selected cell:", self.get_latest_selected())
+			print("Path:", _path)
+			self.highlight_path(_path)
+
+
+func move_along_path(path: PackedInt64Array)-> void:
+	if path.is_empty():
+		_pawn.idle()
+		show_grid()
+		return
+	
+	var target_cell_index: int = path[0]
+	var target_global_position: Vector3 = get_cell_global_position(target_cell_index)
+	if not is_on_target_cell(_pawn.global_position, target_global_position, 0.20):
+		reaching_cell_target(target_cell_index, path)
+	else:
+		target_reached()
+
+
+func reaching_cell_target(target_cell_index: int, path: PackedInt64Array) -> void:
+	if _path.size() > 0:
+		var target_cell_global_position: Vector3 = self.get_cell_global_position(target_cell_index)
+		if _pawn.has_method("move_to"):
+			_pawn.move_to(target_cell_global_position)
+		else:
+			printerr("pawn does not have the 'move_to' method.")
+
+
+func target_reached():
+	if not _path.is_empty():
+		_path.remove_at(0)
+
+
+static func is_on_target_cell(current_global_position: Vector3, target_global_position: Vector3, threshold: float) -> bool:
+	return current_global_position.distance_to(target_global_position) <= threshold
+
+
+func set_pawn(pawn: CharacterBody3D):
+	_pawn = pawn
