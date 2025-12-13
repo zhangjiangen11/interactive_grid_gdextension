@@ -552,12 +552,11 @@ void InteractiveGrid3D::_scan_environnement_obstacles() {
 	for (int row = 0; row < data.rows; row++) {
 		for (int column = 0; column < data.columns; column++) {
 			const int index = row * data.columns + column;
-			const godot::Vector3 cell_pos = data.cells[index]->global_xform.origin;
-
+			const godot::Vector3 cell_shape_pos = data.cells[index]->global_xform.origin + data.cell_shape_offset;
 			godot::Ref<godot::PhysicsShapeQueryParameters3D> query;
 			query.instantiate();
 			query->set_shape(data.cell_shape);
-			query->set_transform(godot::Transform3D(godot::Basis(), cell_pos));
+			query->set_transform(godot::Transform3D(godot::Basis(), cell_shape_pos));
 			query->set_collision_mask(data.obstacles_collision_masks);
 			query->set_collide_with_bodies(true);
 			query->set_collide_with_areas(true);
@@ -775,6 +774,9 @@ void InteractiveGrid3D::_bind_methods() {
 	godot::ClassDB::bind_method(godot::D_METHOD("set_cell_shape", "cell_shape"), &InteractiveGrid3D::set_cell_shape);
 	godot::ClassDB::bind_method(godot::D_METHOD("get_cell_shape"), &InteractiveGrid3D::get_cell_shape);
 
+	godot::ClassDB::bind_method(godot::D_METHOD("set_cell_shape_offset", "cell_shape_offset"), &InteractiveGrid3D::set_cell_shape_offset);
+	godot::ClassDB::bind_method(godot::D_METHOD("get_cell_shape_offset"), &InteractiveGrid3D::get_cell_shape_offset);
+
 	godot::ClassDB::bind_method(godot::D_METHOD("set_walkable_color"), &InteractiveGrid3D::set_walkable_color);
 	godot::ClassDB::bind_method(godot::D_METHOD("get_walkable_color"), &InteractiveGrid3D::get_walkable_color);
 
@@ -863,6 +865,7 @@ void InteractiveGrid3D::_bind_methods() {
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::VECTOR2, "cell_size"), "set_cell_size", "get_cell_size");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::OBJECT, "cell_mesh", godot::PROPERTY_HINT_RESOURCE_TYPE, "Mesh"), "set_cell_mesh", "get_cell_mesh");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::OBJECT, "cell_shape", godot::PROPERTY_HINT_RESOURCE_TYPE, "Shape3D"), "set_cell_shape", "get_cell_shape");
+	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::VECTOR3, "cell_shape_offset"), "set_cell_shape_offset", "get_cell_shape_offset");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::COLOR, "walkable_color"), "set_walkable_color", "get_walkable_color");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::COLOR, "unwalkable_color"), "set_unwalkable_color", "get_unwalkable_color");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::COLOR, "unreachable_color"), "set_unreachable_color", "get_unreachable_color");
@@ -958,7 +961,15 @@ godot::Ref<godot::Shape3D> InteractiveGrid3D::get_cell_shape() const {
 	return data.cell_shape;
 }
 
-void InteractiveGrid3D::set_layout(Layout p_layout) {
+void InteractiveGrid3D::set_cell_shape_offset(godot::Vector3 p_offset) {
+	data.cell_shape_offset = p_offset;
+}
+
+godot::Vector3 InteractiveGrid3D::get_cell_shape_offset() {
+	return data.cell_shape_offset;
+}
+
+void InteractiveGrid3D::InteractiveGrid3D::set_layout(Layout p_layout) {
 	data.layout_index = p_layout;
 	_delete();
 }

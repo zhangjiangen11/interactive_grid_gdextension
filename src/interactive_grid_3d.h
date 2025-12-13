@@ -105,6 +105,7 @@ private:
 
 		godot::Ref<godot::Mesh> cell_mesh;
 		godot::Ref<godot::Shape3D> cell_shape;
+		godot::Vector3 cell_shape_offset = godot::Vector3(0.0f, 0.0f, 0.0f);
 		godot::MultiMeshInstance3D *multimesh_instance;
 		godot::Ref<godot::MultiMesh> multimesh;
 		godot::Vector2 cell_size = godot::Vector2(1.0f, 1.0f);
@@ -190,6 +191,9 @@ public:
 
 	void set_cell_shape(const godot::Ref<godot::Shape3D> &p_shape);
 	godot::Ref<godot::Shape3D> get_cell_shape() const;
+
+	void set_cell_shape_offset(godot::Vector3 p_offset);
+	godot::Vector3 get_cell_shape_offset();
 
 	void set_layout(Layout p_layout);
 	Layout get_layout() const;
