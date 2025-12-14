@@ -12,7 +12,7 @@
   <img src="/docs/thumbnail/thumbnail_300x300px.png"/>
 </p>
 
-InteractiveGrid3D is a Node3D that allows player interaction with a 3D grid. It can be used for cell selection, pathfinding, and hover highlights.
+InteractiveGrid is a Godot GDExtension that allows player interaction with a 3D grid, including cell selection, pathfinding, and hover highlights.
 
 ## Features
 
