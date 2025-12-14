@@ -1683,7 +1683,7 @@ godot::PackedInt64Array InteractiveGrid3D::get_path(int p_start_cell_index, int 
 	return path;
 }
 
-godot::PackedInt64Array InteractiveGrid3D::get_neighbors(int p_cell_index) const {
+godot::Array InteractiveGrid3D::get_neighbors(int p_cell_index) const {
 	return data.cells[p_cell_index]->neighbors;
 }
 

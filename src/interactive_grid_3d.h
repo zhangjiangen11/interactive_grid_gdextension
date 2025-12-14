@@ -85,7 +85,7 @@ private:
 		uint32_t custom_collision_layer = 0;
 		godot::Color custom_color;
 		bool has_custom_color = false;
-		godot::PackedInt64Array neighbors;
+		godot::Array neighbors;
 	};
 
 	struct Data {
@@ -276,7 +276,7 @@ public:
 	godot::Array get_selected_cells();
 	int get_latest_selected() const;
 	godot::PackedInt64Array get_path(int p_start_cell_index, int p_target_cell_index) const;
-	godot::PackedInt64Array get_neighbors(int p_cell_index) const;
+	godot::Array get_neighbors(int p_cell_index) const;
 
 	void set_print_logs_enabled(bool p_enabled);
 	bool is_print_logs_enabled() const;
