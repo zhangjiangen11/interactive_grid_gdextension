@@ -1,6 +1,6 @@
 [gd_scene load_steps=13 format=3 uid="uid://causf6bjt06hi"]
 
-[ext_resource type="Shader" uid="uid://dc4oav4wip1yi" path="res://data/ressources/Shaders/custom_data.gdshader" id="3_yeeyf"]
+[ext_resource type="Shader" uid="uid://dc4oav4wip1yi" path="res://data/ressources/Shaders/interractive_grid.gdshader" id="3_yeeyf"]
 [ext_resource type="PackedScene" uid="uid://cg8gsg3iyhmeu" path="res://data/ui/try_me.tscn" id="4_2qaj2"]
 [ext_resource type="Script" uid="uid://cnxwc4e8vdiox" path="res://data/scripts/interactive_grid_3d.gd" id="4_w868w"]
 [ext_resource type="PackedScene" uid="uid://dbna5exmjhbhp" path="res://data/scenes/pawn_player.tscn" id="5_dxyxo"]
@@ -45,7 +45,7 @@ collision_layer = 65536
 use_custom_color = true
 color = Color(1, 0, 0, 1)
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_pbhab"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_yeeyf"]
 render_priority = 0
 shader = ExtResource("3_yeeyf")
 
@@ -68,13 +68,11 @@ collision_mask = 0
 text = "(Press SPACE)"
 
 [node name="InteractiveGrid3D" type="InteractiveGrid3D" parent="."]
-_rows = 13
-_columns = 13
 cell_size = Vector2(1.5, 1.29)
 cell_mesh = SubResource("CylinderMesh_dkjo2")
 cell_shape = SubResource("CylinderShape3D_yeeyf")
 custom_cells_data = [SubResource("CustomCellData_eqrjm"), SubResource("CustomCellData_g470t"), SubResource("CustomCellData_yeeyf"), SubResource("CustomCellData_pbhab"), SubResource("CustomCellData_fatw5")]
-material_override = SubResource("ShaderMaterial_pbhab")
+material_override = SubResource("ShaderMaterial_yeeyf")
 layout = 1
 movement = 1
 script = ExtResource("4_w868w")

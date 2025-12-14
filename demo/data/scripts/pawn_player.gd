@@ -76,11 +76,11 @@ func move_to(global_position: Vector3)-> void:
 	else:
 		animation_player.play("run", 0.2)
 
-	var dir = (target_global_position - model.global_position)
+	var dir: Vector3 = (target_global_position - model.global_position)
 	dir.y = 0
 	dir = dir.normalized()
 
-	var target_rot = atan2(-dir.x, -dir.z)
+	var target_rot: float = atan2(-dir.x, -dir.z)
 	model.rotation.y = lerp_angle(model.rotation.y, target_rot, 0.2)
 
 	move_and_slide()
