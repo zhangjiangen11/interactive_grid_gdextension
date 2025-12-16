@@ -54,12 +54,7 @@ void InteractiveGrid3D::_create() {
 		data.flags |= GFL_CREATED;
 
 		center(data.center_global_position);
-
-		if (godot::Engine::get_singleton()->is_editor_hint()) {
-			set_visible(true);
-		} else {
-			set_visible(false);
-		}
+		set_visible(true);
 	}
 }
 
