@@ -98,7 +98,7 @@ void InteractiveGrid3D::_init_multi_mesh() {
 					row * data.columns + column;
 
 			data.multimesh->set_instance_transform(index, xform);
-			data.multimesh->set_instance_custom_data(index, data.walkable_color);
+			data.multimesh->set_instance_custom_data(index, data.accessible_color);
 
 			data.cells.push_back(new Cell);
 			data.cells.write[index]->index = index;
@@ -243,7 +243,7 @@ void InteractiveGrid3D::_configure_astar() {
 		int x = index % data.columns;
 		int y = index / data.columns;
 		data.astar->add_point(index, godot::Vector2(x, y), 1.0);
-		data.astar->set_point_disabled(index, !is_cell_walkable(index));
+		data.astar->set_point_disabled(index, !is_cell_accessible(index));
 	}
 
 	switch (data.movement) {
@@ -337,10 +337,10 @@ void InteractiveGrid3D::_configure_astar_6_dir() {
 
 					data.cells[index]->neighbors.push_back(neighbor_index);
 
-					if (!is_cell_walkable(index))
+					if (!is_cell_accessible(index))
 						continue;
 
-					if (is_cell_walkable(neighbor_index)) {
+					if (is_cell_accessible(neighbor_index)) {
 						if (!data.astar->has_point(neighbor_index)) {
 							data.astar->add_point(neighbor_index, godot::Vector2(nx, ny));
 						}
@@ -370,8 +370,8 @@ void InteractiveGrid3D::_configure_astar_8_dir() {
 						int neighbor_index = ny * data.columns + nx;
 						data.cells[index]->neighbors.push_back(neighbor_index);
 
-						bool neighbor_walkable = is_cell_walkable(neighbor_index);
-						if (neighbor_walkable) {
+						bool neighbor_accessible = is_cell_accessible(neighbor_index);
+						if (neighbor_accessible) {
 							data.astar->connect_points(index, neighbor_index);
 						}
 					}
@@ -381,11 +381,11 @@ void InteractiveGrid3D::_configure_astar_8_dir() {
 	}
 }
 
-void InteractiveGrid3D::_breadth_first_search(unsigned int p_start_cell_index) {
+void InteractiveGrid3D::_breadth_first_search(int p_start_cell_index) {
 	struct BSFNode {
 		int index{ 0 };
 		bool visited = false;
-		bool is_walkable = false;
+		bool is_accessible = false;
 		bool is_reachable = false;
 		godot::PackedInt64Array neighbors;
 	};
@@ -395,7 +395,7 @@ void InteractiveGrid3D::_breadth_first_search(unsigned int p_start_cell_index) {
 	graph.resize(grid_size);
 
 	for (int index = 0; index < grid_size; index++) {
-		graph.write[index].is_walkable = is_cell_walkable(index);
+		graph.write[index].is_accessible = is_cell_accessible(index);
 		graph.write[index].is_reachable = is_cell_reachable(index);
 		graph.write[index].is_reachable = is_cell_reachable(index);
 		graph.write[index].neighbors = get_neighbors(index);
@@ -410,12 +410,12 @@ void InteractiveGrid3D::_breadth_first_search(unsigned int p_start_cell_index) {
 		int current = queue.front()->get();
 		queue.pop_front();
 
-		if (!graph[current].is_walkable) {
+		if (!graph[current].is_accessible) {
 			continue;
 		}
 
 		for (const int &neighbor : graph[current].neighbors) {
-			if (!graph[neighbor].is_walkable) {
+			if (!graph[neighbor].is_accessible) {
 				continue;
 			}
 
@@ -427,7 +427,7 @@ void InteractiveGrid3D::_breadth_first_search(unsigned int p_start_cell_index) {
 	}
 
 	for (int index = 0; index < grid_size; index++) {
-		if (graph[index].is_walkable && !graph[index].visited)
+		if (graph[index].is_accessible && !graph[index].visited)
 			set_cell_reachable(index, false);
 	}
 }
@@ -496,15 +496,15 @@ void InteractiveGrid3D::_align_cells_with_floor() {
 					data.cells.write[index]->local_xform = xform;
 					data.cells.write[index]->global_xform = data.multimesh_instance->get_global_transform() * data.multimesh->get_instance_transform(index);
 
-					set_cell_walkable(index, true);
+					set_cell_accessible(index, true);
 					set_cell_reachable(index, true);
 					set_cell_visible(index, true);
 
 				} else if (!godot::Engine::get_singleton()->is_editor_hint()) {
 					_set_cell_in_void(index, true);
-					set_cell_walkable(index, false);
+					set_cell_accessible(index, false);
 				} else {
-					set_cell_walkable(index, true);
+					set_cell_accessible(index, true);
 					set_cell_reachable(index, true);
 					set_cell_visible(index, true);
 				}
@@ -567,7 +567,7 @@ void InteractiveGrid3D::_scan_environnement_obstacles() {
 					godot::Node *collider = godot::Object::cast_to<godot::Node>(collider_obj);
 
 					if (collider) {
-						set_cell_walkable(index, false);
+						set_cell_accessible(index, false);
 					}
 				}
 			}
@@ -774,11 +774,11 @@ void InteractiveGrid3D::_bind_methods() {
 	godot::ClassDB::bind_method(godot::D_METHOD("set_cell_shape_offset", "cell_shape_offset"), &InteractiveGrid3D::set_cell_shape_offset);
 	godot::ClassDB::bind_method(godot::D_METHOD("get_cell_shape_offset"), &InteractiveGrid3D::get_cell_shape_offset);
 
-	godot::ClassDB::bind_method(godot::D_METHOD("set_walkable_color"), &InteractiveGrid3D::set_walkable_color);
-	godot::ClassDB::bind_method(godot::D_METHOD("get_walkable_color"), &InteractiveGrid3D::get_walkable_color);
+	godot::ClassDB::bind_method(godot::D_METHOD("set_accessible_color"), &InteractiveGrid3D::set_accessible_color);
+	godot::ClassDB::bind_method(godot::D_METHOD("get_accessible_color"), &InteractiveGrid3D::get_accessible_color);
 
-	godot::ClassDB::bind_method(godot::D_METHOD("set_unwalkable_color"), &InteractiveGrid3D::set_unwalkable_color);
-	godot::ClassDB::bind_method(godot::D_METHOD("get_unwalkable_color"), &InteractiveGrid3D::get_unwalkable_color);
+	godot::ClassDB::bind_method(godot::D_METHOD("set_unaccessible_color"), &InteractiveGrid3D::set_unaccessible_color);
+	godot::ClassDB::bind_method(godot::D_METHOD("get_unaccessible_color"), &InteractiveGrid3D::get_unaccessible_color);
 
 	godot::ClassDB::bind_method(godot::D_METHOD("set_unreachable_color"), &InteractiveGrid3D::set_unreachable_color);
 	godot::ClassDB::bind_method(godot::D_METHOD("get_unreachable_color"), &InteractiveGrid3D::get_unreachable_color);
@@ -827,13 +827,13 @@ void InteractiveGrid3D::_bind_methods() {
 	godot::ClassDB::bind_method(godot::D_METHOD("is_grid_created"), &InteractiveGrid3D::is_created);
 	godot::ClassDB::bind_method(godot::D_METHOD("reset_cells_state"), &InteractiveGrid3D::reset_cells_state);
 
-	godot::ClassDB::bind_method(godot::D_METHOD("is_cell_walkable", "cell_index"), &InteractiveGrid3D::is_cell_walkable);
+	godot::ClassDB::bind_method(godot::D_METHOD("is_cell_accessible", "cell_index"), &InteractiveGrid3D::is_cell_accessible);
 	godot::ClassDB::bind_method(godot::D_METHOD("is_cell_reachable", "cell_index"), &InteractiveGrid3D::is_cell_reachable);
 	godot::ClassDB::bind_method(godot::D_METHOD("is_cell_hovered", "cell_index"), &InteractiveGrid3D::is_cell_hovered);
 	godot::ClassDB::bind_method(godot::D_METHOD("is_cell_selected", "cell_index"), &InteractiveGrid3D::is_cell_selected);
 	godot::ClassDB::bind_method(godot::D_METHOD("is_cell_visible", "cell_index"), &InteractiveGrid3D::is_cell_visible);
 
-	godot::ClassDB::bind_method(godot::D_METHOD("set_cell_walkable", "cell_index", "is_walkable"), &InteractiveGrid3D::set_cell_walkable);
+	godot::ClassDB::bind_method(godot::D_METHOD("set_cell_accessible", "cell_index", "is_accessible"), &InteractiveGrid3D::set_cell_accessible);
 	godot::ClassDB::bind_method(godot::D_METHOD("set_cell_reachable", "cell_index", "set_cell_reachable"), &InteractiveGrid3D::set_cell_reachable);
 
 	godot::ClassDB::bind_method(godot::D_METHOD("set_cell_color", "cell_index", "color"), &InteractiveGrid3D::set_cell_color);
@@ -862,8 +862,8 @@ void InteractiveGrid3D::_bind_methods() {
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::OBJECT, "cell_mesh", godot::PROPERTY_HINT_RESOURCE_TYPE, "Mesh"), "set_cell_mesh", "get_cell_mesh");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::OBJECT, "cell_shape", godot::PROPERTY_HINT_RESOURCE_TYPE, "Shape3D"), "set_cell_shape", "get_cell_shape");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::VECTOR3, "cell_shape_offset"), "set_cell_shape_offset", "get_cell_shape_offset");
-	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::COLOR, "walkable_color"), "set_walkable_color", "get_walkable_color");
-	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::COLOR, "unwalkable_color"), "set_unwalkable_color", "get_unwalkable_color");
+	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::COLOR, "accessible_color"), "set_accessible_color", "get_accessible_color");
+	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::COLOR, "unaccessible_color"), "set_unaccessible_color", "get_unaccessible_color");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::COLOR, "unreachable_color"), "set_unreachable_color", "get_unreachable_color");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::COLOR, "selected_color"), "set_selected_color", "get_selected_color");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::COLOR, "path_color"), "set_path_color", "get_path_color");
@@ -981,22 +981,22 @@ InteractiveGrid3D::Movement InteractiveGrid3D::get_movement() const {
 	return data.movement;
 }
 
-void InteractiveGrid3D::set_walkable_color(const godot::Color &p_color) {
-	data.walkable_color = p_color;
+void InteractiveGrid3D::set_accessible_color(const godot::Color &p_color) {
+	data.accessible_color = p_color;
 	_delete();
 }
 
-godot::Color InteractiveGrid3D::get_walkable_color() const {
-	return data.walkable_color;
+godot::Color InteractiveGrid3D::get_accessible_color() const {
+	return data.accessible_color;
 }
 
-void InteractiveGrid3D::set_unwalkable_color(const godot::Color &p_color) {
-	data.unwalkable_color = p_color;
+void InteractiveGrid3D::set_unaccessible_color(const godot::Color &p_color) {
+	data.unaccessible_color = p_color;
 	_delete();
 }
 
-godot::Color InteractiveGrid3D::get_unwalkable_color() const {
-	return data.unwalkable_color;
+godot::Color InteractiveGrid3D::get_unaccessible_color() const {
+	return data.unaccessible_color;
 }
 
 void InteractiveGrid3D::set_unreachable_color(const godot::Color &p_color) {
@@ -1120,7 +1120,7 @@ void InteractiveGrid3D::clear_custom_cell_data(int p_cell_index, godot::String p
 
 		if (p_clear_custom_color) {
 			data.cells.write[p_cell_index]->has_custom_color = false;
-			set_cell_color(p_cell_index, data.walkable_color);
+			set_cell_color(p_cell_index, data.accessible_color);
 		}
 
 		break;
@@ -1135,7 +1135,7 @@ void InteractiveGrid3D::clear_all_custom_cell_data(int p_cell_index) {
 	data.cells.write[p_cell_index]->flags &= ~data.cells[p_cell_index]->custom_flags;
 	data.cells.write[p_cell_index]->custom_flags = 0;
 	data.cells.write[p_cell_index]->has_custom_color = false;
-	set_cell_color(p_cell_index, data.walkable_color);
+	set_cell_color(p_cell_index, data.accessible_color);
 }
 
 void InteractiveGrid3D::set_material_override(const godot::Ref<godot::Material> &p_material) {
@@ -1191,7 +1191,7 @@ void InteractiveGrid3D::highlight_on_hover(godot::Vector3 p_global_position) {
 				if (data.cells[data.hovered_cell_index]->has_custom_color) {
 					set_cell_color(data.hovered_cell_index, data.cells[data.hovered_cell_index]->custom_color);
 				} else {
-					set_cell_color(data.hovered_cell_index, data.walkable_color);
+					set_cell_color(data.hovered_cell_index, data.accessible_color);
 				}
 			}
 
@@ -1211,14 +1211,14 @@ void InteractiveGrid3D::highlight_on_hover(godot::Vector3 p_global_position) {
 			if (data.cells[data.hovered_cell_index]->has_custom_color) {
 				set_cell_color(data.hovered_cell_index, data.cells[data.hovered_cell_index]->custom_color);
 			} else {
-				set_cell_color(data.hovered_cell_index, data.walkable_color);
+				set_cell_color(data.hovered_cell_index, data.accessible_color);
 			}
 		}
 
 		data.hovered_cell_index = -1;
 	}
 
-	if (!is_cell_walkable(closest_index)) {
+	if (!is_cell_accessible(closest_index)) {
 		return;
 	}
 
@@ -1458,7 +1458,7 @@ void InteractiveGrid3D::hide_distant_cells(int p_start_cell_index, float p_dista
 
 				if (start_cell_position.distance_to(index_cell_position) > p_distance) {
 					set_cell_visible(index, false);
-					data.cells.write[index]->flags &= ~CFL_WALKABLE;
+					data.cells.write[index]->flags &= ~CFL_ACCESSIBLE;
 				}
 			}
 		}
@@ -1491,8 +1491,8 @@ bool InteractiveGrid3D::is_centered() const {
 	return (data.flags & GFL_CENTERED) != 0;
 }
 
-bool InteractiveGrid3D::is_cell_walkable(int p_cell_index) const {
-	return (data.cells[p_cell_index]->flags & CFL_WALKABLE) != 0;
+bool InteractiveGrid3D::is_cell_accessible(int p_cell_index) const {
+	return (data.cells[p_cell_index]->flags & CFL_ACCESSIBLE) != 0;
 }
 
 bool InteractiveGrid3D::is_cell_reachable(int p_cell_index) const {
@@ -1519,17 +1519,17 @@ bool InteractiveGrid3D::is_cell_visible(int p_cell_index) const {
 	return (data.cells[p_cell_index]->flags & CFL_VISIBLE) != 0;
 }
 
-void InteractiveGrid3D::set_cell_walkable(int p_cell_index, bool p_is_walkable) {
+void InteractiveGrid3D::set_cell_accessible(int p_cell_index, bool p_is_accessible) {
 	if (is_cell_index_out_of_bounds(__FILE__, __FUNCTION__, __LINE__, p_cell_index)) {
 		return;
 	}
 
-	if (p_is_walkable) {
-		data.cells.write[p_cell_index]->flags |= CFL_WALKABLE;
-		set_cell_color(p_cell_index, data.walkable_color);
-	} else if (!p_is_walkable) {
-		data.cells.write[p_cell_index]->flags &= ~CFL_WALKABLE;
-		set_cell_color(p_cell_index, data.unwalkable_color);
+	if (p_is_accessible) {
+		data.cells.write[p_cell_index]->flags |= CFL_ACCESSIBLE;
+		set_cell_color(p_cell_index, data.accessible_color);
+	} else if (!p_is_accessible) {
+		data.cells.write[p_cell_index]->flags &= ~CFL_ACCESSIBLE;
+		set_cell_color(p_cell_index, data.unaccessible_color);
 	}
 }
 
@@ -1574,7 +1574,7 @@ void InteractiveGrid3D::InteractiveGrid3D::reset_cells_state() {
 			const int index = row * data.columns + column;
 			clear_all_custom_cell_data(index);
 			data.cells.write[index]->flags = 0;
-			set_cell_walkable(index, true);
+			set_cell_accessible(index, true);
 		}
 	}
 
@@ -1638,8 +1638,8 @@ void InteractiveGrid3D::select_cell(int p_cell_index) {
 		return;
 	}
 
-	bool walkable = is_cell_walkable(p_cell_index);
-	if (walkable) {
+	bool accessible = is_cell_accessible(p_cell_index);
+	if (accessible) {
 		_set_cell_selected(p_cell_index, true);
 		data.selected_cells.push_back(p_cell_index);
 	}

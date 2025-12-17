@@ -113,8 +113,8 @@ private:
 		godot::Array selected_cells;
 		int hovered_cell_index = -1;
 
-		godot::Color walkable_color{ godot::Color(0.5, 0.65, 1.0, 1) }; // BLUE
-		godot::Color unwalkable_color{ godot::Color(0.8039216, 0.36078432, 0.36078432, 1.0) }; // INDIAN_RED
+		godot::Color accessible_color{ godot::Color(0.5, 0.65, 1.0, 1) }; // BLUE
+		godot::Color unaccessible_color{ godot::Color(0.8039216, 0.36078432, 0.36078432, 1.0) }; // INDIAN_RED
 		godot::Color unreachable_color{ godot::Color(1.0, 1.0, 1.0, 1.0) }; // #ffffff00
 		godot::Color selected_color{ godot::Color(0.8784314, 1.0, 1.0, 1.0) }; // LIGHT_CYAN
 		godot::Color path_color{ godot::Color(0.5647059, 0.93333334, 0.5647059, 1) };
@@ -130,7 +130,7 @@ private:
 	static constexpr int GFL_CELL_DISTANT_HIDDEN = 1 << 3;
 	static constexpr int GFL_HOVER_ENABLED = 1 << 4;
 
-	static constexpr int CFL_WALKABLE = 1 << 0;
+	static constexpr int CFL_ACCESSIBLE = 1 << 0;
 	static constexpr int CFL_REACHABLE = 1 << 1;
 	static constexpr int CFL_IN_VOID = 1 << 2;
 	static constexpr int CFL_HOVERED = 1 << 3;
@@ -156,7 +156,7 @@ private:
 	void _configure_astar_4_dir();
 	void _configure_astar_6_dir();
 	void _configure_astar_8_dir();
-	void _breadth_first_search(unsigned int p_start_cell_index);
+	void _breadth_first_search(int p_start_cell_index);
 
 	void _apply_material(const godot::Ref<godot::Material> &p_material);
 
@@ -198,11 +198,11 @@ public:
 	void set_movement(Movement p_movement);
 	Movement get_movement() const;
 
-	void set_walkable_color(const godot::Color &p_color);
-	godot::Color get_walkable_color() const;
+	void set_accessible_color(const godot::Color &p_color);
+	godot::Color get_accessible_color() const;
 
-	void set_unwalkable_color(const godot::Color &p_color);
-	godot::Color get_unwalkable_color() const;
+	void set_unaccessible_color(const godot::Color &p_color);
+	godot::Color get_unaccessible_color() const;
 
 	void set_unreachable_color(const godot::Color &p_color);
 	godot::Color get_unreachable_color() const;
@@ -246,7 +246,7 @@ public:
 	bool is_created() const;
 	bool is_centered() const;
 
-	bool is_cell_walkable(int p_cell_index) const;
+	bool is_cell_accessible(int p_cell_index) const;
 	bool is_cell_reachable(int p_cell_index) const;
 	bool is_cell_in_void(int p_cell_index) const;
 	bool is_cell_hovered(int p_cell_index) const;
@@ -254,7 +254,7 @@ public:
 	bool is_cell_on_path(int p_cell_index) const;
 	bool is_cell_visible(int p_cell_index) const;
 
-	void set_cell_walkable(int p_cell_index, const bool p_is_walkable);
+	void set_cell_accessible(int p_cell_index, const bool p_is_accessible);
 	void set_cell_reachable(int p_cell_index, bool p_is_unreachable);
 	void set_cell_visible(int p_cell_index, const bool p_is_visible);
 
