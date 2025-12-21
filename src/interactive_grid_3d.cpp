@@ -158,6 +158,13 @@ void InteractiveGrid3D::_layout_cells_as_square_grid(godot::Vector3 p_center_pos
 			godot::Transform3D cell_transform;
 			cell_transform.origin = local_cell_pos;
 			cell_transform.basis = data.multimesh->get_instance_transform(index).basis;
+
+			godot::Basis rotation_basis;
+			rotation_basis = rotation_basis.rotated(godot::Vector3(1, 0, 0), data.cell_rotation.x);
+			rotation_basis = rotation_basis.rotated(godot::Vector3(0, 1, 0), data.cell_rotation.y);
+			rotation_basis = rotation_basis.rotated(godot::Vector3(0, 0, 1), data.cell_rotation.z);
+
+			cell_transform.basis = cell_transform.basis * rotation_basis;
 			data.multimesh->set_instance_transform(index, cell_transform);
 
 			data.cells.write[index]->local_xform = data.multimesh->get_instance_transform(index);
@@ -214,7 +221,15 @@ void InteractiveGrid3D::_layout_cells_as_hexagonal_grid(godot::Vector3 p_center_
 			godot::Vector3 local_cell_pos = global_cell_pos - data.multimesh_instance->get_global_transform().origin;
 			godot::Transform3D cell_transform;
 			cell_transform.origin = local_cell_pos;
+
 			cell_transform.basis = data.multimesh->get_instance_transform(index).basis;
+
+			godot::Basis rotation_basis;
+			rotation_basis = rotation_basis.rotated(godot::Vector3(1, 0, 0), data.cell_rotation.x);
+			rotation_basis = rotation_basis.rotated(godot::Vector3(0, 1, 0), data.cell_rotation.y);
+			rotation_basis = rotation_basis.rotated(godot::Vector3(0, 0, 1), data.cell_rotation.z);
+
+			cell_transform.basis = cell_transform.basis * rotation_basis;
 			data.multimesh->set_instance_transform(index, cell_transform);
 
 			data.cells.write[index]->local_xform = data.multimesh->get_instance_transform(index);
@@ -774,6 +789,9 @@ void InteractiveGrid3D::_bind_methods() {
 	godot::ClassDB::bind_method(godot::D_METHOD("set_cell_shape_offset", "cell_shape_offset"), &InteractiveGrid3D::set_cell_shape_offset);
 	godot::ClassDB::bind_method(godot::D_METHOD("get_cell_shape_offset"), &InteractiveGrid3D::get_cell_shape_offset);
 
+	godot::ClassDB::bind_method(godot::D_METHOD("set_cell_rotation", "cell_rotation"), &InteractiveGrid3D::set_cell_rotation);
+	godot::ClassDB::bind_method(godot::D_METHOD("get_cell_rotation"), &InteractiveGrid3D::get_cell_rotation);
+
 	godot::ClassDB::bind_method(godot::D_METHOD("set_accessible_color"), &InteractiveGrid3D::set_accessible_color);
 	godot::ClassDB::bind_method(godot::D_METHOD("get_accessible_color"), &InteractiveGrid3D::get_accessible_color);
 
@@ -862,6 +880,7 @@ void InteractiveGrid3D::_bind_methods() {
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::OBJECT, "cell_mesh", godot::PROPERTY_HINT_RESOURCE_TYPE, "Mesh"), "set_cell_mesh", "get_cell_mesh");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::OBJECT, "cell_shape", godot::PROPERTY_HINT_RESOURCE_TYPE, "Shape3D"), "set_cell_shape", "get_cell_shape");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::VECTOR3, "cell_shape_offset"), "set_cell_shape_offset", "get_cell_shape_offset");
+	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::VECTOR3, "cell_rotation", godot::PROPERTY_HINT_RANGE, "-360,360,0.1,or_less,or_greater,radians_as_degrees", godot::PROPERTY_USAGE_EDITOR), "set_cell_rotation", "get_cell_rotation");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::COLOR, "accessible_color"), "set_accessible_color", "get_accessible_color");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::COLOR, "unaccessible_color"), "set_unaccessible_color", "get_unaccessible_color");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::COLOR, "unreachable_color"), "set_unreachable_color", "get_unreachable_color");
@@ -916,6 +935,10 @@ int InteractiveGrid3D::get_columns() const {
 	return data.columns;
 }
 
+int InteractiveGrid3D::get_size() const {
+	return data.rows * data.columns;
+}
+
 void InteractiveGrid3D::set_cell_size(godot::Vector2 p_cell_size) {
 	data.cell_size = p_cell_size;
 	_delete();
@@ -923,11 +946,6 @@ void InteractiveGrid3D::set_cell_size(godot::Vector2 p_cell_size) {
 
 godot::Vector2 InteractiveGrid3D::get_cell_size(void) const {
 	return data.cell_size;
-}
-
-int InteractiveGrid3D::get_size() const {
-	return data.rows * data.columns;
-	;
 }
 
 void InteractiveGrid3D::set_cell_mesh(const godot::Ref<godot::Mesh> &p_mesh) {
@@ -962,6 +980,15 @@ void InteractiveGrid3D::set_cell_shape_offset(godot::Vector3 p_offset) {
 
 godot::Vector3 InteractiveGrid3D::get_cell_shape_offset() {
 	return data.cell_shape_offset;
+}
+
+void InteractiveGrid3D::set_cell_rotation(godot::Vector3 p_rotation) {
+	data.cell_rotation = p_rotation;
+	_delete();
+}
+
+godot::Vector3 InteractiveGrid3D::get_cell_rotation() {
+	return data.cell_rotation;
 }
 
 void InteractiveGrid3D::InteractiveGrid3D::set_layout(Layout p_layout) {

@@ -71,6 +71,7 @@ text = "(Press SPACE)"
 cell_size = Vector2(1.5, 1.29)
 cell_mesh = SubResource("CylinderMesh_dkjo2")
 cell_shape = SubResource("CylinderShape3D_yeeyf")
+cell_shape_offset = Vector3(0, 1, 0)
 custom_cells_data = [SubResource("CustomCellData_eqrjm"), SubResource("CustomCellData_g470t"), SubResource("CustomCellData_yeeyf"), SubResource("CustomCellData_pbhab"), SubResource("CustomCellData_fatw5")]
 material_override = SubResource("ShaderMaterial_yeeyf")
 layout = 1

@@ -103,6 +103,7 @@ private:
 		godot::Ref<godot::Mesh> cell_mesh;
 		godot::Ref<godot::Shape3D> cell_shape;
 		godot::Vector3 cell_shape_offset = godot::Vector3(0.0f, 0.0f, 0.0f);
+		godot::Vector3 cell_rotation = godot::Vector3(0.0f, 0.0f, 0.0f);
 		godot::MultiMeshInstance3D *multimesh_instance;
 		godot::Ref<godot::MultiMesh> multimesh;
 		godot::Vector2 cell_size = godot::Vector2(1.0f, 1.0f);
@@ -178,10 +179,10 @@ public:
 	void set_columns(int p_columns);
 	int get_columns() const;
 
+	int get_size() const;
+
 	void set_cell_size(godot::Vector2 p_cell_size);
 	godot::Vector2 get_cell_size() const;
-
-	int get_size() const;
 
 	void set_cell_mesh(const godot::Ref<godot::Mesh> &p_mesh);
 	godot::Ref<godot::Mesh> get_cell_mesh() const;
@@ -191,6 +192,9 @@ public:
 
 	void set_cell_shape_offset(godot::Vector3 p_offset);
 	godot::Vector3 get_cell_shape_offset();
+
+	void set_cell_rotation(godot::Vector3 p_rotation);
+	godot::Vector3 get_cell_rotation();
 
 	void set_layout(Layout p_layout);
 	Layout get_layout() const;
