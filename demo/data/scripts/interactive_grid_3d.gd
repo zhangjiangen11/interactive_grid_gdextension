@@ -67,7 +67,7 @@ func show_grid():
 	var pawn_current_cell_index: int = self.get_cell_index_from_global_position(_pawn.global_position)
 
 	# To prevent the player from getting stuck.
-	self.set_cell_walkable(pawn_current_cell_index, true)
+	self.set_cell_accessible(pawn_current_cell_index, true)
 	self.set_cell_reachable(pawn_current_cell_index, true)
 
 	self.hide_distant_cells(pawn_current_cell_index, 6)
@@ -103,7 +103,7 @@ func _input(event):
 				return
 
 			var pawn_current_cell_index: int = self.get_cell_index_from_global_position(self.get_grid_center_global_position())
-			self.set_cell_walkable(pawn_current_cell_index, true)
+			self.set_cell_accessible(pawn_current_cell_index, true)
 			_path = self.get_path(pawn_current_cell_index, selected_cells[0])
 			print("Last selected cell:", self.get_latest_selected())
 			print("Path:", _path)
