@@ -269,8 +269,8 @@ public:
 	void set_obstacles_collision_masks(int p_mask);
 	int get_obstacles_collision_masks();
 
-	void set_grid_floor_collision_mask(int p_mask);
-	int get_grid_floor_collision_mask();
+	void set_floor_collision_mask(int p_mask);
+	int get_floor_collision_mask();
 
 	void select_cell(int p_cell_index);
 	godot::Array get_selected_cells();

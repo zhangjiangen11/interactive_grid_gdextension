@@ -859,8 +859,8 @@ void InteractiveGrid3D::_bind_methods() {
 	godot::ClassDB::bind_method(godot::D_METHOD("set_obstacles_collision_masks", "masks"), &InteractiveGrid3D::set_obstacles_collision_masks);
 	godot::ClassDB::bind_method(godot::D_METHOD("get_obstacles_collision_masks"), &InteractiveGrid3D::get_obstacles_collision_masks);
 
-	godot::ClassDB::bind_method(godot::D_METHOD("set_grid_floor_collision_masks", "masks"), &InteractiveGrid3D::set_grid_floor_collision_mask);
-	godot::ClassDB::bind_method(godot::D_METHOD("get_grid_floor_collision_masks"), &InteractiveGrid3D::get_grid_floor_collision_mask);
+	godot::ClassDB::bind_method(godot::D_METHOD("set_floor_collision_masks", "masks"), &InteractiveGrid3D::set_floor_collision_mask);
+	godot::ClassDB::bind_method(godot::D_METHOD("get_floor_collision_masks"), &InteractiveGrid3D::get_floor_collision_mask);
 
 	godot::ClassDB::bind_method(godot::D_METHOD("select_cell", "global_position"), &InteractiveGrid3D::select_cell);
 	godot::ClassDB::bind_method(godot::D_METHOD("get_selected_cells"), &InteractiveGrid3D::get_selected_cells);
@@ -892,7 +892,7 @@ void InteractiveGrid3D::_bind_methods() {
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::INT, "layout", godot::PROPERTY_HINT_ENUM, "SQUARE, HEXAGONAL"), "set_layout", "get_layout");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::INT, "movement", godot::PROPERTY_HINT_ENUM, "FOUR-DIRECTIONS,SIX-DIRECTIONS,EIGH-DIRECTIONS"), "set_movement", "get_movement");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::INT, "obstacles_collision_masks", godot::PROPERTY_HINT_LAYERS_3D_PHYSICS), "set_obstacles_collision_masks", "get_obstacles_collision_masks");
-	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::INT, "floor_collision_masks", godot::PROPERTY_HINT_LAYERS_3D_PHYSICS), "set_grid_floor_collision_masks", "get_grid_floor_collision_masks");
+	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::INT, "floor_collision_masks", godot::PROPERTY_HINT_LAYERS_3D_PHYSICS), "set_floor_collision_masks", "get_floor_collision_masks");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::BOOL, "print_logs_enabled"), "set_print_logs_enabled", "is_print_logs_enabled");
 	ADD_PROPERTY(godot::PropertyInfo(godot::Variant::BOOL, "print_execution_time_enabled"), "set_print_execution_time_enabled", "is_print_execution_time_enabled");
 
@@ -1636,11 +1636,11 @@ int InteractiveGrid3D::get_obstacles_collision_masks() {
 	return data.obstacles_collision_masks;
 }
 
-void InteractiveGrid3D::set_grid_floor_collision_mask(int p_mask) {
+void InteractiveGrid3D::set_floor_collision_mask(int p_mask) {
 	data.floor_collision_mask = p_mask;
 }
 
-int InteractiveGrid3D::get_grid_floor_collision_mask() {
+int InteractiveGrid3D::get_floor_collision_mask() {
 	return data.floor_collision_mask;
 }
 
