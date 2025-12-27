@@ -2,20 +2,20 @@
 *.gen.*
 .godot/
 
-# Keep addons and their binaries
-!addons/
-!addons/**/*.gdextension
-!addons/**/*.so
-!addons/**/*.dll
-!addons/**/*.dylib
-!addons/**/*.gitkeep
+# Keep bin and their binaries
+!bin/
+!bin/**/*.gdextension
+!bin/**/*.so
+!bin/**/*.dll
+!bin/**/*.dylib
+!bin/**/*.gitkeep
 
-!demo/addons/
-!demo/addons/**/*.gdextension
-!demo/addons/**/*.so
-!demo/addons/**/*.dll
-!demo/addons/**/*.dylib
-!demo/addons/**/*.gitkeep
+!demo/bin/
+!demo/bin/**/*.gdextension
+!demo/bin/**/*.so
+!demo/bin/**/*.dll
+!demo/bin/**/*.dylib
+!demo/bin/**/*.gitkeep
 
 # Ignore SCons database
 .sconsign*.dblite

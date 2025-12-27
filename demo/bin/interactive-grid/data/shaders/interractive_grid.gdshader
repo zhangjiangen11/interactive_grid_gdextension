@@ -8,7 +8,7 @@ varying vec4 instance_c_default;
 varying float alpha;
 
 // Default cell flags:
-const int CFL_ACCESSIBLE = 1 << 0;
+const int CFL_WALKABLE = 1 << 0;
 const int CFL_REACHABLE = 1 << 1;
 const int CFL_IN_VOID = 1 << 2;
 const int CFL_HOVERED = 1 << 3;
@@ -33,7 +33,7 @@ void vertex() {
    int cell_flag = int(instance_c.a);
    alpha = 0.5;
 
-   if ((cell_flag & CFL_ACCESSIBLE) == 0) {
+   if ((cell_flag & CFL_WALKABLE) == 0) {
       alpha = 0.20;
    }
 
@@ -41,7 +41,7 @@ void vertex() {
       && (cell_flag & CFL_PATH) == 0
       && (cell_flag & CFL_TRAP) == 0)
       {
-         if ((cell_flag & CFL_ACCESSIBLE) != 0) {
+         if ((cell_flag & CFL_WALKABLE) != 0) {
             alpha = 0.40;
             instance_c.r = 0.2;
             instance_c.g = 0.5;

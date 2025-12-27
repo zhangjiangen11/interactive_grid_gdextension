@@ -93,7 +93,7 @@ jobs:
         if: ${{ matrix.target.platform == 'windows' }}
         shell: pwsh
         run: |
-          Remove-Item addons/* -Include *.exp,*.lib,*.pdb -Force
+          Remove-Item bin/* -Include *.exp,*.lib,*.pdb -Force
 
       # Upload the build
       - name: Upload Artifact
@@ -101,7 +101,7 @@ jobs:
         with:
           name: interactive-grid-${{ matrix.target.platform }}-${{ matrix.target.arch }}-${{ matrix.float-precision }}-${{ matrix.target-type }}
           path: |
-            ${{ github.workspace }}/addons/interactive-grid/**
+            ${{ github.workspace }}/bin/interactive-grid/**
 
   merge:
     runs-on: ubuntu-22.04
@@ -120,7 +120,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: interactive-grid
-          path: addons/interactive-grid/
+          path: bin/interactive-grid/
 
       #  Deploy the merged build.
       - name: Deploy all builds to GitHub Pages
