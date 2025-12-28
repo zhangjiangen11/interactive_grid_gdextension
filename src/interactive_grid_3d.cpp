@@ -564,11 +564,12 @@ void InteractiveGrid3D::_scan_environnement_obstacles() {
 	for (int row = 0; row < data.rows; row++) {
 		for (int column = 0; column < data.columns; column++) {
 			const int index = row * data.columns + column;
-			const godot::Vector3 cell_shape_pos = data.cells[index]->global_xform.origin + data.cell_shape_offset;
+
+			godot::Transform3D cell_transform = data.cells.write[index]->local_xform;
 			godot::Ref<godot::PhysicsShapeQueryParameters3D> query;
 			query.instantiate();
 			query->set_shape(data.cell_shape);
-			query->set_transform(godot::Transform3D(godot::Basis(), cell_shape_pos));
+			query->set_transform(cell_transform);
 			query->set_collision_mask(data.obstacles_collision_masks);
 			query->set_collide_with_bodies(true);
 			query->set_collide_with_areas(true);
@@ -832,7 +833,9 @@ void InteractiveGrid3D::_bind_methods() {
 	godot::ClassDB::bind_method(godot::D_METHOD("get_cell_global_position", "cell_index"), &InteractiveGrid3D::get_cell_global_position);
 	godot::ClassDB::bind_method(godot::D_METHOD("get_cell_index_from_global_position", "global_position"), &InteractiveGrid3D::get_cell_index_from_global_position);
 	godot::ClassDB::bind_method(godot::D_METHOD("get_center_global_position"), &InteractiveGrid3D::get_center_global_position);
-
+	godot::ClassDB::bind_method(godot::D_METHOD("get_cell_transform", "cell_index"), &InteractiveGrid3D::get_cell_transform);
+	godot::ClassDB::bind_method(godot::D_METHOD("get_cell_global_transform", "cell_index"), &InteractiveGrid3D::get_cell_global_transform);
+		
 	godot::ClassDB::bind_method(godot::D_METHOD("set_layout", "layout"), &InteractiveGrid3D::set_layout);
 	godot::ClassDB::bind_method(godot::D_METHOD("get_layout"), &InteractiveGrid3D::get_layout);
 
@@ -1367,6 +1370,14 @@ int InteractiveGrid3D::get_cell_index_from_global_position(godot::Vector3 p_glob
 
 godot::Vector3 InteractiveGrid3D::get_center_global_position() const {
 	return data.center_global_position;
+}
+
+godot::Transform3D InteractiveGrid3D::get_cell_transform(int p_cell_index) const {
+	return data.cells[p_cell_index]->local_xform;
+}
+
+godot::Transform3D InteractiveGrid3D::get_cell_global_transform(int p_cell_index) const {
+	return data.cells[p_cell_index]->global_xform;
 }
 
 void InteractiveGrid3D::center(godot::Vector3 p_center_position) {
