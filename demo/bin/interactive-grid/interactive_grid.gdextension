@@ -9,7 +9,7 @@ reloadable = true
 macos.single.debug = "./macos/libinteractive_grid.macos.template_debug.dylib"
 macos.double.debug = "./macos/libinteractive_grid.macos.template_debug.double.dylib"
 macos.single.release = "./macos/libinteractive_grid.macos.template_release.dylib"
-macos.double.release = "./macos/libinteractive_grid.macos.template_debug.double.dylib"
+macos.double.release = "./macos/libinteractive_grid.macos.template_release.double.dylib"
 
 ios.arm64.single.debug = "./ios/libinteractive_grid.ios.template_debug.arm64.dylib"
 ios.arm64.double.debug = "./ios/libinteractive_grid.ios.template_debug.arm64.double.dylib"
@@ -52,7 +52,7 @@ android.arm64.single.release = "./android/libinteractive_grid.android.template_r
 android.arm64.double.release = "./android/libinteractive_grid.android.template_release.arm64.double.so"
 
 web.wasm32.single.debug = "./web/libinteractive_grid.web.template_debug.wasm32.nothreads.wasm"
-web.wasm32.double.debug = "./web/libinteractive_grid.web.template_release.wasm32.double.nothreads.wasm"
+web.wasm32.double.debug = "./web/libinteractive_grid.web.template_debug.wasm32.double.nothreads.wasm"
 web.wasm32.single.release = "./web/libinteractive_grid.web.template_release.wasm32.nothreads.wasm"
 web.wasm32.double.release = "./web/libinteractive_grid.web.template_release.wasm32.double.nothreads.wasm"
 
