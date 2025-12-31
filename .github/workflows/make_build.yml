@@ -1,9 +1,14 @@
 # For syntax, see https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax
 # This workflow is triggered manually on the "Actions" tab on GitHub, and can be used to create releases.
 
-name: Make a GDExtension build for all supported platforms
+name: Make and deploy a GDExtension build for all supported platforms
 on:
   workflow_dispatch:
+    inputs:
+      message:
+        description: "Commit message"
+        required: false
+        default: "Deploy GDExtension build"
 
 jobs:
   build:
@@ -88,17 +93,35 @@ jobs:
         with:
           name: interactive-grid-${{ matrix.target.platform }}-${{ matrix.target.arch }}-${{ matrix.float-precision }}-${{ matrix.target-type }}
           path: |
-            ${{ github.workspace }}/bin/**
+            ${{ github.workspace }}/demo/bin/**
 
-  # Merges all the build artifacts together into a single interactive-grid artifact.
-  # If you comment out this step, all the builds will be uploaded individually.
   merge:
     runs-on: ubuntu-22.04
     needs: build
     steps:
+      # Merges all the build artifacts together into a single interactive-grid artifact.
       - name: Merge Artifacts
         uses: actions/upload-artifact/merge@v4
         with:
           name: interactive-grid
           pattern: interactive-grid-*
           delete-merged: true
+
+      # Download the merged artifact.
+      - name: Download merged artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: interactive-grid
+          path: bin/interactive-grid/
+
+      #  Deploy the merged artifact.
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./
+          force_orphan: true
+          publish_branch: godot-asset-lib
+          enable_jekyll: true
+          keep_files: false
+          commit_message: ${{ github.event.inputs.message }}
