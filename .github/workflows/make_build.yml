@@ -10,6 +10,9 @@ on:
         required: false
         default: "Deploy GDExtension build"
 
+permissions:
+  contents: write
+  
 jobs:
   build:
     strategy:
