@@ -6,6 +6,7 @@
   "version_string": "{{ context.inputs.tag_name }}",
   "cost": "MIT",
   "download_provider": "GitHub",
+  "download_commit": "https://github.com/antoinecharruel/interactive_grid_gdextension/releases/download/{{ context.inputs.tag_name }}/interactive-grid.zip",
   "browse_url": "{{ context.repository.html_url }}",
   "issues_url": "{{ context.repository.html_url }}/issues",
   "download_url": "https://github.com/antoinecharruel/interactive_grid_gdextension/releases/download/{{ context.inputs.tag_name }}/interactive-grid.zip",
