@@ -5,7 +5,7 @@
   "godot_version": "4.4",
   "version_string": "{{ context.inputs.tag_name }}",
   "cost": "MIT",
-  "download_provider": "GitHub",
+  "download_provider": "Custom",
   "download_commit": "https://github.com/antoinecharruel/interactive_grid_gdextension/releases/download/{{ context.inputs.tag_name }}/interactive-grid.zip",
   "browse_url": "{{ context.repository.html_url }}",
   "issues_url": "{{ context.repository.html_url }}/issues",
