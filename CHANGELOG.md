@@ -1,3 +1,3 @@
 # Changelog
 
-changelog example
+docs: update documentation InteractiveGrid3D.xml
