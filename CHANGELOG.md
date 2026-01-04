@@ -1,3 +1,3 @@
 # Changelog
 
-refactor: rename release zip base folder from 'bin' to 'addons'
+- refactor: rename release zip base folder from 'bin' to 'addons'
