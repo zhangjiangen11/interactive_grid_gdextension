@@ -131,13 +131,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: interactive-grid
-          path: release_bin/bin/
+          path: release/addons/interactive-grid
 
       - name: Create archive
         shell: bash
         run: |
           sudo apt-get update && sudo apt-get install -y zip
-          cd release_bin && zip -r ../interactive-grid.zip .
+          cd release && zip -r ../interactive-grid.zip .
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
