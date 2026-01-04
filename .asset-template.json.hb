@@ -1,7 +1,7 @@
 {
   "title": "Interactive Grid GDExtension",
-  "category_id": "2",
   "category": "3D Tools",
+  "category_id": "2",
   "godot_version": "4.4",
   "version_string": "{{ context.inputs.tag_name }}",
   "cost": "MIT",
