@@ -131,13 +131,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: interactive-grid
-          path: bin/interactive-grid
+          path: release_bin/bin/
 
       - name: Create archive
         shell: bash
         run: |
           sudo apt-get update && sudo apt-get install -y zip
-          zip -r interactive-grid.zip bin/
+          cd release_bin && zip -r ../godot-cpp-template.zip .
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
