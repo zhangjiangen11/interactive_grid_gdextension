@@ -1,18 +1,26 @@
 # For syntax, see https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax
 # This workflow is triggered manually on the "Actions" tab on GitHub, and can be used to create releases.
 
-name: Make and deploy a GDExtension build for all supported platforms
+name: Make and publish a GDExtension build for all supported platforms
 on:
   workflow_dispatch:
     inputs:
-      message:
-        description: "Commit message"
-        required: false
-        default: "Deploy GDExtension build"
+      tag_name:
+        description: "tag_name"
+        required: true
+        default: "tag_name"
+      release_name:
+        description: "release_name"
+        required: true
+        default: "release_name"
+      asset_id:
+        description: "Required: The id of the asset in the asset store."
+        required: true
+        default: "4372"
 
 permissions:
   contents: write
-  
+
 jobs:
   build:
     strategy:
@@ -96,35 +104,59 @@ jobs:
         with:
           name: interactive-grid-${{ matrix.target.platform }}-${{ matrix.target.arch }}-${{ matrix.float-precision }}-${{ matrix.target-type }}
           path: |
-            ${{ github.workspace }}/demo/bin/**
+            ${{ github.workspace }}/bin/**
 
+  # Merges all the build artifacts together into a single interactive-grid artifact.
+  # If you comment out this step, all the builds will be uploaded individually.
   merge:
     runs-on: ubuntu-22.04
     needs: build
     steps:
-      # Merges all the build artifacts together into a single interactive-grid artifact.
       - name: Merge Artifacts
         uses: actions/upload-artifact/merge@v4
         with:
           name: interactive-grid
           pattern: interactive-grid-*
           delete-merged: true
-
-      # Download the merged artifact.
+  
+  # Create a GitHub release
+  release:
+    runs-on: ubuntu-22.04
+    needs: merge
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
       - name: Download merged artifact
         uses: actions/download-artifact@v4
         with:
           name: interactive-grid
-          path: bin/interactive-grid/
+          path: bin/interactive-grid
 
-      #  Deploy the merged artifact.
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Create archive
+        shell: bash
+        run: |
+          sudo apt-get update && sudo apt-get install -y zip
+          zip -r interactive-grid.zip bin/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./
-          force_orphan: true
-          publish_branch: godot-asset-lib
-          enable_jekyll: true
-          keep_files: false
-          commit_message: ${{ github.event.inputs.message }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ github.event.inputs.tag_name }}
+          name: ${{ github.event.inputs.release_name }}
+          body_path: CHANGELOG.md
+          make_latest: true
+          files: interactive-grid.zip
+
+  publish:
+    runs-on: ubuntu-22.04
+    needs: release
+    steps:
+      - name: Publish new version to asset lib
+        uses: deep-entertainment/godot-asset-lib-action@v0.4.0
+        with:
+          # https://docs.github.com/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets
+          username: ${{ secrets.ASSET_STORE_USERNAME }}
+          password: ${{ secrets.ASSET_STORE_PASSWORD }}
+          assetId: ${{ github.event.inputs.asset_id }}
