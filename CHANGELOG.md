@@ -1,3 +1,3 @@
 # Changelog
 
-docs: update documentation InteractiveGrid3D.xml
+refactor: rename release zip base folder from 'bin' to 'addons'
