@@ -15,6 +15,8 @@
 
 InteractiveGrid is a Godot GDExtension that allows player interaction with a 3D grid, including cell selection, pathfinding, and hover highlights.
 
+Note: To use this plugin, simply download it and add the 'addons' folder to your Godot project's root directory. You don't have to enable it in the plugins menu.
+
 ## Features
 
 - Select individual cells.
